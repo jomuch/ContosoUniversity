@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Models;
 
 namespace ContosoUniversity.Data
@@ -20,5 +20,6 @@ namespace ContosoUniversity.Data
             modelBuilder.Entity<Enrollment>().ToTable("Enrollment");
             modelBuilder.Entity<Student>().ToTable("Student");
         }
+        public DbSet<ContosoUniversity.Models.Instructor> Instructor { get; set; }
     }
 }
