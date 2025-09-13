@@ -35,7 +35,7 @@ namespace ContosoUniversity.Pages_Instructors
                 return Page();
             }
 
-            _context.Instructor.Add(Instructor);
+            _context.Instructors.Add(Instructor);
             await _context.SaveChangesAsync();
 
             return RedirectToPage("./Index");

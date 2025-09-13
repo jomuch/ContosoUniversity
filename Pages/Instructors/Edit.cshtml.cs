@@ -30,7 +30,7 @@ namespace ContosoUniversity.Pages_Instructors
                 return NotFound();
             }
 
-            var instructor =  await _context.Instructor.FirstOrDefaultAsync(m => m.ID == id);
+            var instructor =  await _context.Instructors.FirstOrDefaultAsync(m => m.ID == id);
             if (instructor == null)
             {
                 return NotFound();
@@ -71,7 +71,7 @@ namespace ContosoUniversity.Pages_Instructors
 
         private bool InstructorExists(int id)
         {
-            return _context.Instructor.Any(e => e.ID == id);
+            return _context.Instructors.Any(e => e.ID == id);
         }
     }
 }

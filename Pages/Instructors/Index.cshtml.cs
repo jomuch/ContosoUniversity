@@ -23,7 +23,7 @@ namespace ContosoUniversity.Pages_Instructors
 
         public async Task OnGetAsync()
         {
-            Instructor = await _context.Instructor.ToListAsync();
+            Instructor = await _context.Instructors.ToListAsync();
         }
     }
 }

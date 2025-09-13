@@ -29,7 +29,7 @@ namespace ContosoUniversity.Pages_Instructors
                 return NotFound();
             }
 
-            var instructor = await _context.Instructor.FirstOrDefaultAsync(m => m.ID == id);
+            var instructor = await _context.Instructors.FirstOrDefaultAsync(m => m.ID == id);
 
             if (instructor is not null)
             {
@@ -48,11 +48,11 @@ namespace ContosoUniversity.Pages_Instructors
                 return NotFound();
             }
 
-            var instructor = await _context.Instructor.FindAsync(id);
+            var instructor = await _context.Instructors.FindAsync(id);
             if (instructor != null)
             {
                 Instructor = instructor;
-                _context.Instructor.Remove(Instructor);
+                _context.Instructors.Remove(Instructor);
                 await _context.SaveChangesAsync();
             }
 
