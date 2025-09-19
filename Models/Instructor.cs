@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ContosoUniversity.Models
@@ -27,6 +29,10 @@ namespace ContosoUniversity.Models
         public string FullName => LastName + ", " + FirstMidName;
 
         public ICollection<CourseAssignment> CourseAssignments { get; set; } = new List<CourseAssignment>();
+
         public OfficeAssignment? OfficeAssignment { get; set; }
+
+        // This is the missing navigation property
+        public ICollection<Department>? Departments { get; set; }
     }
 }

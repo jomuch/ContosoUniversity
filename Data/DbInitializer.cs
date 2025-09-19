@@ -42,10 +42,10 @@ namespace ContosoUniversity.Data
 
             var departments = new Department[]
             {
-                new Department { Name = "English",     Budget = 350000, StartDate = DateTime.Parse("2007-09-01"), Instructor = instructors.Single( i => i.LastName == "Abercrombie") },
-                new Department { Name = "Mathematics", Budget = 100000, StartDate = DateTime.Parse("2007-09-01"), Instructor = instructors.Single( i => i.LastName == "Fakhouri") },
-                new Department { Name = "Engineering", Budget = 350000, StartDate = DateTime.Parse("2007-09-01"), Instructor = instructors.Single( i => i.LastName == "Harui") },
-                new Department { Name = "Economics",   Budget = 100000, StartDate = DateTime.Parse("2007-09-01"), Instructor = instructors.Single( i => i.LastName == "Kapoor") }
+                new Department { Name = "English",     Budget = 350000, StartDate = DateTime.Parse("2007-09-01"), Administrator = instructors.Single( i => i.LastName == "Abercrombie") },
+                new Department { Name = "Mathematics", Budget = 100000, StartDate = DateTime.Parse("2007-09-01"), Administrator = instructors.Single( i => i.LastName == "Fakhouri") },
+                new Department { Name = "Engineering", Budget = 350000, StartDate = DateTime.Parse("2007-09-01"), Administrator = instructors.Single( i => i.LastName == "Harui") },
+                new Department { Name = "Economics",   Budget = 100000, StartDate = DateTime.Parse("2007-09-01"), Administrator = instructors.Single( i => i.LastName == "Kapoor") }
             };
             context.Departments.AddRange(departments);
 
@@ -70,7 +70,7 @@ namespace ContosoUniversity.Data
 
             var courseAssignments = new CourseAssignment[]
             {
-                new CourseAssignment { Course = courses.Single(c => c.Title == "Chemistry" ), Instructor = instructors.Single(i => i.LastName == "Abrcrombie") },
+                new CourseAssignment { Course = courses.Single(c => c.Title == "Chemistry" ), Instructor = instructors.Single(i => i.LastName == "Abercrombie") },
                 new CourseAssignment { Course = courses.Single(c => c.Title == "Microeconomics" ), Instructor = instructors.Single(i => i.LastName == "Fakhouri") },
                 new CourseAssignment { Course = courses.Single(c => c.Title == "Macroeconomics" ), Instructor = instructors.Single(i => i.LastName == "Harui") },
                 new CourseAssignment { Course = courses.Single(c => c.Title == "Calculus" ), Instructor = instructors.Single(i => i.LastName == "Harui") },
