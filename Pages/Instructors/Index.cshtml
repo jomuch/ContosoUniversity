@@ -1,57 +1,115 @@
-using ContosoUniversity.Data;
-using ContosoUniversity.Models;
-using ContosoUniversity.ViewModels;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
+@page
+@model ContosoUniversity.Pages.Instructors.IndexModel
 
-namespace ContosoUniversity.Pages.Instructors
+@{
+    ViewData["Title"] = "Instructors";
+}
+
+<h2>Instructors</h2>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+
+<form asp-page="./Index" method="get">
+    <div class="form-actions no-color">
+        <p>
+            Find by name:
+            <input type="text" name="SearchString" value="@Model.CurrentFilter" />
+            <input type="submit" value="Search" class="btn btn-default" /> |
+            <a asp-page="./Index">Back to Full List</a>
+        </p>
+    </div>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <a asp-page="./Index" asp-route-sortOrder="@Model.NameSort"
+                   asp-route-currentFilter="@Model.CurrentFilter">@Html.DisplayNameFor(model => model.Instructor[0].FullName)</a>
+            </th>
+            <th>
+                <a asp-page="./Index" asp-route-sortOrder="@Model.DateSort"
+                   asp-route-currentFilter="@Model.CurrentFilter">@Html.DisplayNameFor(model => model.Instructor[0].HireDate)</a>
+            </th>
+            <th>Office</th>
+            <th>Courses</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Instructor)
+        {
+            string selectedRow = "";
+            if (item.ID == Model.InstructorID)
+            {
+                selectedRow = "table-success";
+            }
+            <tr class="@selectedRow">
+                <td>
+                    @Html.DisplayFor(modelItem => item.FullName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.HireDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.OfficeAssignment?.Location)
+                </td>
+                <td>
+                    @{
+                        foreach (var course in item.CourseAssignments)
+                        {
+                            @course.Course.CourseID @: @course.Course.Title <br />
+                        }
+                    }
+                </td>
+                <td>
+                    <a asp-page="./Index" asp-route-id="@item.ID" asp-route-sortOrder="@Model.CurrentSort"
+                       asp-route-pageIndex="@Model.Instructor.PageIndex" asp-route-currentFilter="@Model.CurrentFilter">Select</a> |
+                    <a asp-page="./Edit" asp-route-id="@item.ID">Edit</a> |
+                    <a asp-page="./Details" asp-route-id="@item.ID">Details</a> |
+                    <a asp-page="./Delete" asp-route-id="@item.ID">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@{
+    var prevDisabled = !Model.Instructor.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.Instructor.HasNextPage ? "disabled" : "";
+}
+
+<a asp-page="./Index"
+   asp-route-sortOrder="@Model.CurrentSort"
+   asp-route-pageIndex="@(Model.Instructor.PageIndex - 1)"
+   asp-route-currentFilter="@Model.CurrentFilter"
+   class="btn btn-default @prevDisabled">
+    Previous
+</a>
+<a asp-page="./Index"
+   asp-route-sortOrder="@Model.CurrentSort"
+   asp-route-pageIndex="@(Model.Instructor.PageIndex + 1)"
+   asp-route-currentFilter="@Model.CurrentFilter"
+   class="btn btn-default @nextDisabled">
+    Next
+</a>
+
+@if (Model.AssignedCoursesData != null)
 {
-    public class IndexModel : PageModel
-    {
-        private readonly SchoolContext _context;
-
-        public IndexModel(SchoolContext context)
+    <h3>Courses Taught by Selected Instructor</h3>
+    <table class="table">
+        @foreach (var item in Model.AssignedCoursesData)
         {
-            _context = context;
+            <tr>
+                <td>
+                    @item.CourseID
+                </td>
+                <td>
+                    @item.Title
+                </td>
+            </tr>
         }
-
-        public InstructorIndexData InstructorData { get; set; } = new();
-        public int InstructorID { get; set; }
-        public int CourseID { get; set; }
-
-        public async Task OnGetAsync(int? id, int? courseID)
-        {
-            InstructorData.Instructors = await _context.Instructors
-                  .Include(i => i.OfficeAssignment)
-                  .Include(i => i.CourseAssignments)
-                    .ThenInclude(c => c.Course)
-                        .ThenInclude(c => c.Department)
-                  .OrderBy(i => i.LastName)
-                  .ToListAsync();
-
-            if (id != null)
-            {
-                InstructorID = id.Value;
-                Instructor instructor = InstructorData.Instructors
-                    .Where(i => i.ID == id.Value).Single();
-                InstructorData.Courses = instructor.CourseAssignments.Select(s => s.Course);
-            }
-
-            if (courseID != null)
-            {
-                CourseID = courseID.Value;
-                var selectedCourse = InstructorData.Courses
-                    .Where(x => x.CourseID == courseID).Single();
-                await _context.Entry(selectedCourse)
-                    .Collection(x => x.Enrollments).LoadAsync();
-                foreach (Enrollment enrollment in selectedCourse.Enrollments)
-                {
-                    await _context.Entry(enrollment).Reference(x => x.Student).LoadAsync();
-                }
-                InstructorData.Enrollments = selectedCourse.Enrollments;
-            }
-        }
-    }
+    </table>
 }

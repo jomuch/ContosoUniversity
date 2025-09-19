@@ -1,26 +1,56 @@
-using ContosoUniversity.Data;
-using ContosoUniversity.Models;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
+@page
+@model ContosoUniversity.Pages.Departments.IndexModel
 
-namespace ContosoUniversity.Pages.Departments
-{
-    public class IndexModel : PageModel
-    {
-        private readonly SchoolContext _context;
+@{
+    ViewData["Title"] = "Departments";
+}
 
-        public IndexModel(SchoolContext context)
+<h2>Departments</h2>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <a asp-page="./Index" asp-route-sortOrder="@Model.NameSort">@Html.DisplayNameFor(model => model.Department[0].Name)</a>
+            </th>
+            <th>
+                <a asp-page="./Index" asp-route-sortOrder="@Model.BudgetSort">@Html.DisplayNameFor(model => model.Department[0].Budget)</a>
+            </th>
+            <th>
+                <a asp-page="./Index" asp-route-sortOrder="@Model.StartDateSort">@Html.DisplayNameFor(model => model.Department[0].StartDate)</a>
+            </th>
+            <th>
+                <a asp-page="./Index" asp-route-sortOrder="@Model.InstructorSort">@Html.DisplayNameFor(model => model.Department[0].Administrator)</a>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Department)
         {
-            _context = context;
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Budget)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Administrator?.FullName)
+                </td>
+                <td>
+                    <a asp-page="./Edit" asp-route-id="@item.DepartmentID">Edit</a> |
+                    <a asp-page="./Details" asp-route-id="@item.DepartmentID">Details</a> |
+                    <a asp-page="./Delete" asp-route-id="@item.DepartmentID">Delete</a>
+                </td>
+            </tr>
         }
-
-        public IList<Department>
-    Department { get;set; } = default!;
-
-    public async Task OnGetAsync()
-    {
-    Department = await _context.Departments
-    .Include(d => d.Administrator).ToListAsync();
-    }
-    }
-    }
+    </tbody>
+</table>
