@@ -43,7 +43,10 @@
                     @Html.DisplayFor(modelItem => item.StartDate)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Administrator?.FullName)
+                    @if (item.Administrator != null)
+                    {
+                        @Html.DisplayFor(modelItem => item.Administrator.FullName)
+                    }
                 </td>
                 <td>
                     <a asp-page="./Edit" asp-route-id="@item.DepartmentID">Edit</a> |

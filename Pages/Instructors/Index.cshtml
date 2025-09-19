@@ -54,7 +54,10 @@
                     @Html.DisplayFor(modelItem => item.HireDate)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.OfficeAssignment?.Location)
+                    @if (item.OfficeAssignment != null)
+                    {
+                        @Html.DisplayFor(modelItem => item.OfficeAssignment.Location)
+                    }
                 </td>
                 <td>
                     @{

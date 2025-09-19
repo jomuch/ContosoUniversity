@@ -1,7 +1,7 @@
 ﻿using ContosoUniversity.Models;
 using System;
 using System.Linq;
-
+using ContosoUniversity.Data;
 namespace ContosoUniversity.Data
 {
     public static class DbInitializer
@@ -9,12 +9,10 @@ namespace ContosoUniversity.Data
         public static void Initialize(SchoolContext context)
         {
             context.Database.EnsureCreated();
-
             if (context.Students.Any())
             {
                 return;   // DB has been seeded
             }
-
             var students = new Student[]
             {
                 new Student{FirstMidName="Carson",LastName="Alexander",EnrollmentDate=DateTime.Parse("2019-09-01")},
@@ -28,7 +26,6 @@ namespace ContosoUniversity.Data
             };
             context.Students.AddRange(students);
             context.SaveChanges();
-
             var instructors = new Instructor[]
             {
                 new Instructor { FirstMidName = "Kim",    LastName = "Abercrombie", HireDate = DateTime.Parse("1995-03-11") },
@@ -39,7 +36,6 @@ namespace ContosoUniversity.Data
             };
             context.Instructors.AddRange(instructors);
             context.SaveChanges();
-
             var departments = new Department[]
             {
                 new Department { Name = "English",    Budget = 350000, StartDate = DateTime.Parse("2007-09-01"), InstructorID  = 1 },
@@ -49,7 +45,6 @@ namespace ContosoUniversity.Data
             };
             context.Departments.AddRange(departments);
             context.SaveChanges();
-
             var courses = new Course[]
             {
                 new Course {CourseID = 1050, Title = "Chemistry",      Credits = 3, DepartmentID = 3 },
@@ -62,7 +57,6 @@ namespace ContosoUniversity.Data
             };
             context.Courses.AddRange(courses);
             context.SaveChanges();
-
             var officeAssignments = new OfficeAssignment[]
             {
                 new OfficeAssignment { InstructorID = 1, Location = "Smith 17" },
@@ -71,7 +65,6 @@ namespace ContosoUniversity.Data
             };
             context.OfficeAssignments.AddRange(officeAssignments);
             context.SaveChanges();
-
             var courseAssignments = new CourseAssignment[]
             {
                 new CourseAssignment { CourseID = 1050, InstructorID = 1 },
@@ -84,7 +77,6 @@ namespace ContosoUniversity.Data
             };
             context.CourseAssignments.AddRange(courseAssignments);
             context.SaveChanges();
-
             var enrollments = new Enrollment[]
             {
                 new Enrollment { StudentID = 1, CourseID = 1050, Grade = Grade.A },

@@ -54,10 +54,10 @@ namespace ContosoUniversity.Pages.Departments
                     departments = departments.OrderByDescending(d => d.StartDate);
                     break;
                 case "Instructor":
-                    departments = departments.OrderBy(d => d.Administrator.LastName);
+                    departments = departments.OrderBy(d => d.Administrator == null ? "" : d.Administrator.LastName);
                     break;
                 case "instructor_desc":
-                    departments = departments.OrderByDescending(d => d.Administrator.LastName);
+                    departments = departments.OrderByDescending(d => d.Administrator == null ? "" : d.Administrator.LastName);
                     break;
                 default:
                     departments = departments.OrderBy(d => d.Name);

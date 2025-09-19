@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 
-namespace ContosoUniversity.Pages_Departments
+namespace ContosoUniversity.Pages.Departments
 {
     public class DetailsModel : PageModel
     {
@@ -28,16 +28,16 @@ namespace ContosoUniversity.Pages_Departments
                 return NotFound();
             }
 
-            var department = await _context.Departments.FirstOrDefaultAsync(m => m.DepartmentID == id);
+            Department = await _context.Departments
+                .Include(d => d.Administrator) // Eagerly load the Administrator
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.DepartmentID == id);
 
-            if (department is not null)
+            if (Department == null)
             {
-                Department = department;
-
-                return Page();
+                return NotFound();
             }
-
-            return NotFound();
+            return Page();
         }
     }
 }
