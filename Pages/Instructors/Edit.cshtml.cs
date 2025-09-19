@@ -4,9 +4,6 @@ using ContosoUniversity.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ContosoUniversity.Pages.Instructors
 {
@@ -19,11 +16,9 @@ namespace ContosoUniversity.Pages.Instructors
             _context = context;
         }
 
-
-
         [BindProperty]
         public Instructor Instructor { get; set; } = null!;
-        public List<AssignedCourseData> AssignedCourseDataList { get; set; } = null!;
+        public List<AssignedCourseData> AssignedCourseDataList { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -32,27 +27,28 @@ namespace ContosoUniversity.Pages.Instructors
                 return NotFound();
             }
 
-            Instructor = await _context.Instructors
+            var instructor = await _context.Instructors
                 .Include(i => i.OfficeAssignment)
                 .Include(i => i.CourseAssignments).ThenInclude(i => i.Course)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.ID == id);
 
-            if (Instructor == null)
+            if (instructor == null)
             {
                 return NotFound();
             }
 
+            Instructor = instructor;
             PopulateAssignedCourseData(_context, Instructor);
             return Page();
         }
 
-        public void PopulateAssignedCourseData(SchoolContext context, Instructor instructor)
+        private void PopulateAssignedCourseData(SchoolContext context, Instructor instructor)
         {
             var allCourses = context.Courses;
             var instructorCourses = new HashSet<int>(
                 instructor.CourseAssignments.Select(c => c.CourseID));
-            AssignedCourseDataList = new List<AssignedCourseData>();
+
             foreach (var course in allCourses)
             {
                 AssignedCourseDataList.Add(new AssignedCourseData
@@ -101,17 +97,12 @@ namespace ContosoUniversity.Pages.Instructors
             return Page();
         }
 
-        public void UpdateInstructorCourses(string[] selectedCourses, Instructor instructorToUpdate)
+        private void UpdateInstructorCourses(string[] selectedCourses, Instructor instructorToUpdate)
         {
-            if (selectedCourses == null)
-            {
-                instructorToUpdate.CourseAssignments = new List<CourseAssignment>();
-                return;
-            }
-
             var selectedCoursesHS = new HashSet<string>(selectedCourses);
             var instructorCourses = new HashSet<int>
                 (instructorToUpdate.CourseAssignments.Select(c => c.Course.CourseID));
+
             foreach (var course in _context.Courses)
             {
                 if (selectedCoursesHS.Contains(course.CourseID.ToString()))
@@ -121,8 +112,8 @@ namespace ContosoUniversity.Pages.Instructors
                         instructorToUpdate.CourseAssignments.Add(
                             new CourseAssignment
                             {
-                                InstructorID = instructorToUpdate.ID,
-                                CourseID = course.CourseID
+                                CourseID = course.CourseID,
+                                InstructorID = instructorToUpdate.ID
                             });
                     }
                 }
@@ -130,9 +121,10 @@ namespace ContosoUniversity.Pages.Instructors
                 {
                     if (instructorCourses.Contains(course.CourseID))
                     {
-                        CourseAssignment courseToRemove = instructorToUpdate.CourseAssignments.FirstOrDefault(
-                                                            i => i.CourseID == course.CourseID);
-
+                        CourseAssignment? courseToRemove
+                            = instructorToUpdate
+                                .CourseAssignments
+                                .FirstOrDefault(i => i.CourseID == course.CourseID);
                         if (courseToRemove != null)
                         {
                             _context.Remove(courseToRemove);

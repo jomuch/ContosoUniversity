@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using ContosoUniversity.Utilities
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -6,7 +7,6 @@
     <title>@ViewData["Title"] - Contoso University</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/ContosoUniversity.styles.css" asp-append-version="true" />
 </head>
 <body>
     <header>
@@ -19,36 +19,33 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
+                        @{
+                            var activePage = PageNav.ActivePage(ViewContext);
+                        }
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/About">About</a>
+                            <a class="nav-link text-dark @(activePage == "About" ? "active" : "")" asp-area="" asp-page="/About">About</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Students/Index">Students</a>
+                            <a class="nav-link text-dark @(activePage == "Students" ? "active" : "")" asp-area="" asp-page="/Students/Index">Students</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Courses/Index">Courses</a>
+                            <a class="nav-link text-dark @(activePage == "Courses" ? "active" : "")" asp-area="" asp-page="/Courses/Index">Courses</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Instructors/Index">Instructors</a>
+                            <a class="nav-link text-dark @(activePage == "Instructors" ? "active" : "")" asp-area="" asp-page="/Instructors/Index">Instructors</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Departments/Index">Departments</a>
-                        </li>
-                        <li class="nav-item ms-auto">
-                            <button id="theme-toggle" class="btn">🌙</button>
+                            <a class="nav-link text-dark @(activePage == "Departments" ? "active" : "")" asp-area="" asp-page="/Departments/Index">Departments</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-
-    <div class="page-container">
-        <div class="container">
-            <main role="main" class="pb-3">
-                @RenderBody()
-            </main>
-        </div>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
     </div>
 
     <footer class="border-top footer text-muted">

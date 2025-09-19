@@ -14,7 +14,7 @@ namespace ContosoUniversity.Data
         public DbSet<Enrollment> Enrollments { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<Department> Departments { get; set; }
-        public DbSet<Instructor> Instructors { get; set; }
+        public DbSet<Instructor> Instructors { get; set; } // <-- Check this line
         public DbSet<OfficeAssignment> OfficeAssignments { get; set; }
         public DbSet<CourseAssignment> CourseAssignments { get; set; }
 
@@ -28,9 +28,6 @@ namespace ContosoUniversity.Data
             modelBuilder.Entity<OfficeAssignment>().ToTable("OfficeAssignment");
             modelBuilder.Entity<CourseAssignment>().ToTable("CourseAssignment");
 
-            // This is the line that fixes the error.
-            // It tells Entity Framework that the primary key for the CourseAssignment
-            // table is a combination of both CourseID and InstructorID.
             modelBuilder.Entity<CourseAssignment>().HasKey(c => new { c.CourseID, c.InstructorID });
         }
     }
