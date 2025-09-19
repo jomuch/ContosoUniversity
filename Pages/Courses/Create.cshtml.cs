@@ -1,51 +1,48 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
+using System.Threading.Tasks;
 
 namespace ContosoUniversity.Pages.Courses
 {
     public class CreateModel : PageModel
     {
-        private readonly ContosoUniversity.Data.SchoolContext _context;
+        private readonly SchoolContext _context;
 
-        public CreateModel(ContosoUniversity.Data.SchoolContext context)
+        public CreateModel(SchoolContext context)
         {
             _context = context;
         }
 
+        // Property for dropdown list of departments
+        public SelectList DepartmentList { get; set; } = default!;
+
+        // Bind property for the course to create; initialized to avoid null warnings
+        [BindProperty]
+        public Course Course { get; set; } = new Course();
+
         public IActionResult OnGet()
         {
-            // This line populates the ViewData with a SelectList of Departments
-            ViewData["DepartmentID"] = new SelectList(_context.Departments, "DepartmentID", "Name");
+            // Populate dropdown list
+            DepartmentList = new SelectList(_context.Departments, "DepartmentID", "Name");
             return Page();
         }
 
-        [BindProperty]
-        public Course Course { get; set; } = default!;
-
         public async Task<IActionResult> OnPostAsync()
         {
-            var emptyCourse = new Course();
-
-            if (await TryUpdateModelAsync<Course>(
-                emptyCourse,
-                "course",
-                s => s.CourseID, s => s.Credits, s => s.Title, s => s.DepartmentID))
+            if (!ModelState.IsValid)
             {
-                _context.Courses.Add(emptyCourse);
-                await _context.SaveChangesAsync();
-                return RedirectToPage("./Index");
+                // If model validation fails, reload dropdown and return page
+                DepartmentList = new SelectList(_context.Departments, "DepartmentID", "Name");
+                return Page();
             }
 
-            // Reload the view with the correct department list if the model is not valid
-            ViewData["DepartmentID"] = new SelectList(_context.Departments, "DepartmentID", "Name");
-            return Page();
+            _context.Courses.Add(Course);
+            await _context.SaveChangesAsync();
+
+            return RedirectToPage("./Index");
         }
     }
 }

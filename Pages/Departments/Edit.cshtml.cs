@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -13,9 +11,9 @@ namespace ContosoUniversity.Pages.Departments
 {
     public class EditModel : PageModel
     {
-        private readonly ContosoUniversity.Data.SchoolContext _context;
+        private readonly SchoolContext _context;
 
-        public EditModel(ContosoUniversity.Data.SchoolContext context)
+        public EditModel(SchoolContext context)
         {
             _context = context;
         }
@@ -26,20 +24,18 @@ namespace ContosoUniversity.Pages.Departments
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            // The AsNoTracking() call is removed here because it's needed for concurrency handling
+            // Load the department with administrator included (needed for display/edit)
             var department = await _context.Departments
                 .Include(d => d.Administrator)
                 .FirstOrDefaultAsync(m => m.DepartmentID == id);
 
             if (department == null)
-            {
                 return NotFound();
-            }
+
             Department = department;
+
             ViewData["InstructorID"] = new SelectList(_context.Instructors, "ID", "FullName");
             return Page();
         }
@@ -47,18 +43,15 @@ namespace ContosoUniversity.Pages.Departments
         public async Task<IActionResult> OnPostAsync(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var departmentToUpdate = await _context.Departments
-                .Include(i => i.Administrator)
+                .Include(d => d.Administrator)
                 .FirstOrDefaultAsync(m => m.DepartmentID == id);
 
             if (departmentToUpdate == null)
             {
-                // Concurrency error has occurred.
-                // The record was deleted by another user.
+                // Department was deleted by another user
                 var deletedDepartment = new Department();
                 await TryUpdateModelAsync(deletedDepartment);
                 ModelState.AddModelError(string.Empty,
@@ -66,13 +59,13 @@ namespace ContosoUniversity.Pages.Departments
                 return Page();
             }
 
-            // Update the Department object with values from the form.
+            // Set the original RowVersion value to detect concurrency conflicts
             _context.Entry(departmentToUpdate).Property("RowVersion").OriginalValue = Department.RowVersion;
 
             if (await TryUpdateModelAsync<Department>(
                 departmentToUpdate,
                 "Department",
-                s => s.Name, s => s.StartDate, s => s.Budget, s => s.InstructorID))
+                d => d.Name, d => d.StartDate, d => d.Budget, d => d.InstructorID))
             {
                 try
                 {
@@ -81,49 +74,44 @@ namespace ContosoUniversity.Pages.Departments
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
-                    // Concurrency conflict occurred.
-                    // This is the logic to handle it gracefully.
                     var exceptionEntry = ex.Entries.Single();
                     var clientValues = (Department)exceptionEntry.Entity;
                     var databaseEntry = exceptionEntry.GetDatabaseValues();
+
                     if (databaseEntry == null)
                     {
-                        ModelState.AddModelError(string.Empty, "Unable to save. " +
-                            "The department was deleted by another user.");
+                        ModelState.AddModelError(string.Empty,
+                            "Unable to save. The department was deleted by another user.");
                         return Page();
                     }
 
                     var databaseValues = (Department)databaseEntry.ToObject();
+
+                    // Show current database values in validation errors
                     if (databaseValues.Name != clientValues.Name)
-                    {
                         ModelState.AddModelError("Department.Name", $"Current value: {databaseValues.Name}");
-                    }
                     if (databaseValues.Budget != clientValues.Budget)
-                    {
                         ModelState.AddModelError("Department.Budget", $"Current value: {databaseValues.Budget:c}");
-                    }
                     if (databaseValues.StartDate != clientValues.StartDate)
-                    {
                         ModelState.AddModelError("Department.StartDate", $"Current value: {databaseValues.StartDate:d}");
-                    }
                     if (databaseValues.InstructorID != clientValues.InstructorID)
                     {
-                        Instructor databaseAdministrator = await _context.Instructors
+                        var databaseAdministrator = await _context.Instructors
                             .FirstOrDefaultAsync(i => i.ID == databaseValues.InstructorID);
                         ModelState.AddModelError("Department.InstructorID", $"Current value: {databaseAdministrator?.FullName}");
                     }
 
-                    ModelState.AddModelError(string.Empty, "The record you attempted to edit "
-                            + "was modified by another user after you got the original value. "
-                            + "The edit operation was canceled and the current values in the database "
-                            + "have been displayed. If you still want to edit this record, click "
-                            + "the Save button again.");
+                    ModelState.AddModelError(string.Empty,
+                        "The record you attempted to edit was modified by another user after you got the original values. " +
+                        "The edit operation was canceled and the current values in the database have been displayed. " +
+                        "If you still want to edit this record, click the Save button again.");
 
-                    // Reload the view with the new database values for the user to see
-                    Department.RowVersion = (byte[])databaseValues.RowVersion;
+                    // Update the RowVersion to the new value for the form
+                    Department.RowVersion = (byte[])databaseValues.RowVersion!;
                     ModelState.Remove("Department.RowVersion");
                 }
             }
+
             ViewData["InstructorID"] = new SelectList(_context.Instructors, "ID", "FullName");
             return Page();
         }

@@ -1,30 +1,25 @@
-﻿using ContosoUniversity.Models;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
+using ContosoUniversity.Data;
+using ContosoUniversity.Models;
 
 namespace ContosoUniversity.Pages.Students
 {
     public class DeleteModel : PageModel
     {
-        private readonly ContosoUniversity.Data.SchoolContext _context;
-        private readonly ILogger<DeleteModel> _logger;
+        private readonly SchoolContext _context;
 
-        public DeleteModel(ContosoUniversity.Data.SchoolContext context,
-                           ILogger<DeleteModel> logger)
+        public DeleteModel(SchoolContext context)
         {
             _context = context;
-            _logger = logger;
         }
 
         [BindProperty]
-        public Student Student { get; set; }
-        public string ErrorMessage { get; set; }
+        public Student? Student { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int? id, bool? saveChangesError = false)
+        public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
             {
@@ -40,11 +35,6 @@ namespace ContosoUniversity.Pages.Students
                 return NotFound();
             }
 
-            if (saveChangesError.GetValueOrDefault())
-            {
-                ErrorMessage = String.Format("Delete {ID} failed. Try again", id);
-            }
-
             return Page();
         }
 
@@ -55,26 +45,17 @@ namespace ContosoUniversity.Pages.Students
                 return NotFound();
             }
 
-            var student = await _context.Students.FindAsync(id);
+            Student? studentToDelete = await _context.Students.FindAsync(id);
 
-            if (student == null)
+            if (studentToDelete == null)
             {
                 return NotFound();
             }
 
-            try
-            {
-                _context.Students.Remove(student);
-                await _context.SaveChangesAsync();
-                return RedirectToPage("./Index");
-            }
-            catch (DbUpdateException ex)
-            {
-                _logger.LogError(ex, ErrorMessage);
+            _context.Students.Remove(studentToDelete);
+            await _context.SaveChangesAsync();
 
-                return RedirectToAction("./Delete",
-                                     new { id, saveChangesError = true });
-            }
+            return RedirectToPage("./Index");
         }
     }
 }

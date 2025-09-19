@@ -12,26 +12,43 @@
     <h4>Student</h4>
     <hr />
     <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Student.LastName)
-        </dt>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Student!.LastName)</dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Student.LastName)
+            @if (Model.Student != null)
+            {
+                @Html.DisplayFor(model => model.Student.LastName)
+            }
+            else
+            {
+                <span class="text-muted">No student data</span>
+            }
         </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Student.FirstMidName)
-        </dt>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Student!.FirstMidName)</dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Student.FirstMidName)
+            @if (Model.Student != null)
+            {
+                @Html.DisplayFor(model => model.Student.FirstMidName)
+            }
+            else
+            {
+                <span class="text-muted">No student data</span>
+            }
         </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Student.EnrollmentDate)
-        </dt>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Student!.EnrollmentDate)</dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Student.EnrollmentDate)
+            @if (Model.Student != null)
+            {
+                @Html.DisplayFor(model => model.Student.EnrollmentDate)
+            }
+            else
+            {
+                <span class="text-muted">No enrollment date</span>
+            }
         </dd>
     </dl>
-    
+
     <form method="post">
         <input type="hidden" asp-for="Student.ID" />
         <input type="submit" value="Delete" class="btn btn-danger" /> |

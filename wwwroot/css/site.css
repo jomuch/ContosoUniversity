@@ -74,3 +74,43 @@ body.dark-mode {
     body.dark-mode .footer {
         color: #888;
     }
+/* === DARK MODE STYLES === */
+
+body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+    body.dark-mode .navbar {
+        background-color: #1e1e1e !important;
+        border-bottom: 1px solid #333 !important;
+    }
+
+    body.dark-mode .nav-link,
+    body.dark-mode .navbar-brand,
+    body.dark-mode .footer a {
+        color: #e0e0e0 !important;
+    }
+
+    body.dark-mode a {
+        color: #bb86fc;
+        text-decoration: none;
+    }
+
+        body.dark-mode a:hover {
+            color: #d0aaff;
+            text-decoration: underline;
+        }
+
+    body.dark-mode .page-container {
+        background-color: #1e1e1e;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    body.dark-mode .table {
+        color: #e0e0e0;
+    }
+
+    body.dark-mode .footer {
+        color: #888;
+    }

@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -12,14 +9,15 @@ namespace ContosoUniversity.Pages.Departments
 {
     public class DetailsModel : PageModel
     {
-        private readonly ContosoUniversity.Data.SchoolContext _context;
+        private readonly SchoolContext _context;
 
-        public DetailsModel(ContosoUniversity.Data.SchoolContext context)
+        public DetailsModel(SchoolContext context)
         {
             _context = context;
         }
 
-        public Department Department { get; set; } = default!;
+        // Mark Department nullable, because it might be null if not found
+        public Department? Department { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -29,7 +27,7 @@ namespace ContosoUniversity.Pages.Departments
             }
 
             Department = await _context.Departments
-                .Include(d => d.Administrator) // Eagerly load the Administrator
+                .Include(d => d.Administrator)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.DepartmentID == id);
 

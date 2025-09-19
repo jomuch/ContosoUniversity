@@ -1,43 +1,36 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
+using System.Threading.Tasks;
 
 namespace ContosoUniversity.Pages.Courses
 {
     public class DetailsModel : PageModel
     {
-        private readonly ContosoUniversity.Data.SchoolContext _context;
+        private readonly SchoolContext _context;
 
-        public DetailsModel(ContosoUniversity.Data.SchoolContext context)
+        public DetailsModel(SchoolContext context)
         {
             _context = context;
         }
 
-        public Course Course { get; set; } = default!;
+        public Course? Course { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var course = await _context.Courses.FirstOrDefaultAsync(m => m.CourseID == id);
+            Course = await _context.Courses
+                .Include(c => c.Department)
+                .FirstOrDefaultAsync(m => m.CourseID == id);
 
-            if (course is not null)
-            {
-                Course = course;
+            if (Course == null)
+                return NotFound();
 
-                return Page();
-            }
-
-            return NotFound();
+            return Page();
         }
     }
 }

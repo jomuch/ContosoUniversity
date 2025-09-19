@@ -1,6 +1,5 @@
 @page
 @model ContosoUniversity.Pages.Courses.CreateModel
-
 @{
     ViewData["Title"] = "Create";
 }
@@ -10,50 +9,34 @@
 <h4>Course</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <form method="post">
-            @* This line will display any model-level validation errors. *@
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-            <div class="form-group">
-                <label asp-for="Course.CourseID" class="control-label"></label>
+            <div class="form-group mb-3">
+                <label asp-for="Course.CourseID" class="form-label"></label>
                 <input asp-for="Course.CourseID" class="form-control" />
-                @* This line will display validation errors for the CourseID field. *@
                 <span asp-validation-for="Course.CourseID" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Course.Title" class="control-label"></label>
+            <div class="form-group mb-3">
+                <label asp-for="Course.Title" class="form-label"></label>
                 <input asp-for="Course.Title" class="form-control" />
-                @* This line will display validation errors for the Title field. *@
                 <span asp-validation-for="Course.Title" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Course.Credits" class="control-label"></label>
+            <div class="form-group mb-3">
+                <label asp-for="Course.Credits" class="form-label"></label>
                 <input asp-for="Course.Credits" class="form-control" />
-                @* This line will display validation errors for the Credits field. *@
                 <span asp-validation-for="Course.Credits" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Course.DepartmentID" class="control-label"></label>
-                <select asp-for="Course.DepartmentID" class="form-control" asp-items="ViewBag.DepartmentID">
-                    <option value="">-- Select Department --</option>
-                </select>
-                @* This line will display validation errors for the DepartmentID field. *@
+            <div class="form-group mb-3">
+                <label asp-for="Course.DepartmentID" class="form-label"></label>
+                <select asp-for="Course.DepartmentID" class="form-select" asp-items="Model.DepartmentList"></select>
                 <span asp-validation-for="Course.DepartmentID" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
+            <button type="submit" class="btn btn-primary">Create</button>
+            <a asp-page="./Index" class="btn btn-secondary ms-2">Back to List</a>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-page="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <partial name="_ValidationScriptsPartial" />
 }

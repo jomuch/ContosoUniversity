@@ -38,10 +38,18 @@
                             <a class="nav-link text-dark @(activePage == "Departments" ? "active" : "")" asp-area="" asp-page="/Departments/Index">Departments</a>
                         </li>
                     </ul>
+
+                    <!-- 🌙 Dark Mode Toggle Button -->
+                    <div class="d-flex">
+                        <button id="theme-toggle" class="btn btn-outline-secondary ms-2" aria-label="Toggle dark mode" title="Toggle dark mode">
+                            🌙
+                        </button>
+                    </div>
                 </div>
             </div>
         </nav>
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
