@@ -4,155 +4,31 @@
 
 namespace ContosoUniversity.Migrations
 {
-    /// <inheritdoc />
     public partial class AddRowVersionToDepartment : Migration
     {
-        /// <inheritdoc />
+        // This method is used for applying changes (e.g., adding a column) to the database
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Course_Department_DepartmentID",
-                table: "Course");
-
-            migrationBuilder.DropColumn(
-                name: "ConcurrencyToken",
-                table: "Department");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "LastName",
-                table: "Student",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "",
-                oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "FirstMidName",
-                table: "Student",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "",
-                oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "Name",
-                table: "Department",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "",
-                oldClrType: typeof(string),
-                oldType: "nvarchar(50)",
-                oldMaxLength: 50,
-                oldNullable: true);
-
+            // Add the 'RowVersion' column to the 'Department' table
             migrationBuilder.AddColumn<byte[]>(
-                name: "RowVersion",
-                table: "Department",
-                type: "rowversion",
-                rowVersion: true,
-                nullable: false,
-                defaultValue: new byte[0]);
+                name: "RowVersion",          // The name of the new column
+                table: "Department",        // The table we're adding it to
+                type: "rowversion",         // The type of the column (SQL Server rowversion)
+                rowVersion: true,           // This makes it a 'timestamp' (rowversion) column
+                nullable: false);          // This column should not be nullable
 
-            migrationBuilder.AlterColumn<string>(
-                name: "Title",
-                table: "Course",
-                type: "nvarchar(50)",
-                maxLength: 50,
-                nullable: false,
-                defaultValue: "",
-                oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<int>(
-                name: "DepartmentID",
-                table: "Course",
-                type: "int",
-                nullable: false,
-                defaultValue: 0,
-                oldClrType: typeof(int),
-                oldType: "int",
-                oldNullable: true);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Course_Department_DepartmentID",
-                table: "Course",
-                column: "DepartmentID",
-                principalTable: "Department",
-                principalColumn: "DepartmentID",
-                onDelete: ReferentialAction.Cascade);
+            // Optionally, you could also add more migration steps here, such as altering other tables or columns
         }
 
-        /// <inheritdoc />
+        // This method is used to undo changes made in the 'Up' method (e.g., drop a column)
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Course_Department_DepartmentID",
-                table: "Course");
-
+            // Drop the 'RowVersion' column from the 'Department' table (undoes the Up method)
             migrationBuilder.DropColumn(
-                name: "RowVersion",
-                table: "Department");
+                name: "RowVersion",         // The name of the column to drop
+                table: "Department");       // The table from which we are dropping the column
 
-            migrationBuilder.AlterColumn<string>(
-                name: "LastName",
-                table: "Student",
-                type: "nvarchar(max)",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "FirstMidName",
-                table: "Student",
-                type: "nvarchar(max)",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "Name",
-                table: "Department",
-                type: "nvarchar(50)",
-                maxLength: 50,
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
-
-            migrationBuilder.AddColumn<byte[]>(
-                name: "ConcurrencyToken",
-                table: "Department",
-                type: "rowversion",
-                rowVersion: true,
-                nullable: true);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "Title",
-                table: "Course",
-                type: "nvarchar(max)",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(50)",
-                oldMaxLength: 50);
-
-            migrationBuilder.AlterColumn<int>(
-                name: "DepartmentID",
-                table: "Course",
-                type: "int",
-                nullable: true,
-                oldClrType: typeof(int),
-                oldType: "int");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Course_Department_DepartmentID",
-                table: "Course",
-                column: "DepartmentID",
-                principalTable: "Department",
-                principalColumn: "DepartmentID");
+            // Optionally, you could add more undo steps here, such as restoring altered columns or tables
         }
     }
 }

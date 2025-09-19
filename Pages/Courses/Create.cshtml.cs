@@ -1,8 +1,8 @@
+using ContosoUniversity.Data;
+using ContosoUniversity.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using ContosoUniversity.Data;
-using ContosoUniversity.Models;
 using System.Threading.Tasks;
 
 namespace ContosoUniversity.Pages.Courses
@@ -16,32 +16,31 @@ namespace ContosoUniversity.Pages.Courses
             _context = context;
         }
 
-        // Property for dropdown list of departments
-        public SelectList DepartmentList { get; set; } = default!;
-
-        // Bind property for the course to create; initialized to avoid null warnings
+        // Bind the Course model to the form input
         [BindProperty]
         public Course Course { get; set; } = new Course();
 
+        // Property for the department dropdown
+        public SelectList DepartmentList { get; set; } = default!;
+
+        // On GET: Populate the department list for the dropdown
         public IActionResult OnGet()
         {
-            // Populate dropdown list
             DepartmentList = new SelectList(_context.Departments, "DepartmentID", "Name");
             return Page();
         }
 
+        // On POST: Save the new course to the database
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
             {
-                // If model validation fails, reload dropdown and return page
                 DepartmentList = new SelectList(_context.Departments, "DepartmentID", "Name");
                 return Page();
             }
 
             _context.Courses.Add(Course);
             await _context.SaveChangesAsync();
-
             return RedirectToPage("./Index");
         }
     }
