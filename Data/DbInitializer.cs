@@ -31,21 +31,21 @@ namespace ContosoUniversity.Data
 
             var instructors = new Instructor[]
             {
-                new Instructor { FirstMidName = "Kim",     LastName = "Abercrombie", HireDate = DateTime.Parse("1995-03-11") },
-                new Instructor { FirstMidName = "Fadi",    LastName = "Fakhouri",    HireDate = DateTime.Parse("2002-07-06") },
-                new Instructor { FirstMidName = "Roger",   LastName = "Harui",       HireDate = DateTime.Parse("1998-07-01") },
+                new Instructor { FirstMidName = "Kim",    LastName = "Abercrombie", HireDate = DateTime.Parse("1995-03-11") },
+                new Instructor { FirstMidName = "Fadi",   LastName = "Fakhouri",    HireDate = DateTime.Parse("2002-07-06") },
+                new Instructor { FirstMidName = "Roger",  LastName = "Harui",       HireDate = DateTime.Parse("1998-07-01") },
                 new Instructor { FirstMidName = "Candace", LastName = "Kapoor",      HireDate = DateTime.Parse("2001-01-15") },
-                new Instructor { FirstMidName = "Roger",   LastName = "Zheng",       HireDate = DateTime.Parse("2004-02-12") }
+                new Instructor { FirstMidName = "Roger",  LastName = "Zheng",       HireDate = DateTime.Parse("2004-02-12") }
             };
             context.Instructors.AddRange(instructors);
             context.SaveChanges();
 
             var departments = new Department[]
             {
-                new Department { Name = "English",   Budget = 350000, StartDate = DateTime.Parse("2007-09-01"), InstructorID  = 1 },
+                new Department { Name = "English",    Budget = 350000, StartDate = DateTime.Parse("2007-09-01"), InstructorID  = 1 },
                 new Department { Name = "Mathematics", Budget = 100000, StartDate = DateTime.Parse("2007-09-01"), InstructorID  = 2 },
                 new Department { Name = "Engineering", Budget = 350000, StartDate = DateTime.Parse("2007-09-01"), InstructorID  = 3 },
-                new Department { Name = "Economics",   Budget = 100000, StartDate = DateTime.Parse("2007-09-01"), InstructorID  = 4 }
+                new Department { Name = "Economics",    Budget = 100000, StartDate = DateTime.Parse("2007-09-01"), InstructorID  = 4 }
             };
             context.Departments.AddRange(departments);
             context.SaveChanges();

@@ -19,7 +19,7 @@ namespace ContosoUniversity.Pages.Instructors
             _context = context;
         }
 
-        public PaginatedList<Instructor> Instructor { get; set; }
+        public PaginatedList<Instructor> Instructor { get; set; } = default!;
         public string NameSort { get; set; } = null!;
         public string DateSort { get; set; } = null!;
         public string CurrentFilter { get; set; } = null!;
@@ -79,7 +79,7 @@ namespace ContosoUniversity.Pages.Instructors
                 InstructorID = id.Value;
                 InstructorData = Instructor.Single(i => i.ID == id.Value);
                 var courses = InstructorData.CourseAssignments.Select(s => s.Course);
-                AssignedCoursesData = await courses.ToListAsync();
+                AssignedCoursesData = courses.ToList();
             }
         }
     }
