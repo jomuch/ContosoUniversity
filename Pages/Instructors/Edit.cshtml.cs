@@ -1,27 +1,29 @@
-using System;
+using ContosoUniversity.Data;
+using ContosoUniversity.Models;
+using ContosoUniversity.ViewModels;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using ContosoUniversity.Data;
-using ContosoUniversity.Models;
 
-namespace ContosoUniversity.Pages_Instructors
+namespace ContosoUniversity.Pages.Instructors
 {
     public class EditModel : PageModel
     {
-        private readonly ContosoUniversity.Data.SchoolContext _context;
+        private readonly SchoolContext _context;
 
-        public EditModel(ContosoUniversity.Data.SchoolContext context)
+        public EditModel(SchoolContext context)
         {
             _context = context;
         }
 
+
+
         [BindProperty]
-        public Instructor Instructor { get; set; } = default!;
+        public Instructor Instructor { get; set; } = null!;
+        public List<AssignedCourseData> AssignedCourseDataList { get; set; } = null!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -30,48 +32,114 @@ namespace ContosoUniversity.Pages_Instructors
                 return NotFound();
             }
 
-            var instructor =  await _context.Instructors.FirstOrDefaultAsync(m => m.ID == id);
-            if (instructor == null)
+            Instructor = await _context.Instructors
+                .Include(i => i.OfficeAssignment)
+                .Include(i => i.CourseAssignments).ThenInclude(i => i.Course)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.ID == id);
+
+            if (Instructor == null)
             {
                 return NotFound();
             }
-            Instructor = instructor;
+
+            PopulateAssignedCourseData(_context, Instructor);
             return Page();
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more information, see https://aka.ms/RazorPagesCRUD.
-        public async Task<IActionResult> OnPostAsync()
+        public void PopulateAssignedCourseData(SchoolContext context, Instructor instructor)
         {
-            if (!ModelState.IsValid)
+            var allCourses = context.Courses;
+            var instructorCourses = new HashSet<int>(
+                instructor.CourseAssignments.Select(c => c.CourseID));
+            AssignedCourseDataList = new List<AssignedCourseData>();
+            foreach (var course in allCourses)
             {
-                return Page();
-            }
-
-            _context.Attach(Instructor).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!InstructorExists(Instructor.ID))
+                AssignedCourseDataList.Add(new AssignedCourseData
                 {
-                    return NotFound();
+                    CourseID = course.CourseID,
+                    Title = course.Title,
+                    Assigned = instructorCourses.Contains(course.CourseID)
+                });
+            }
+        }
+
+        public async Task<IActionResult> OnPostAsync(int? id, string[] selectedCourses)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var instructorToUpdate = await _context.Instructors
+                .Include(i => i.OfficeAssignment)
+                .Include(i => i.CourseAssignments)
+                    .ThenInclude(i => i.Course)
+                .FirstOrDefaultAsync(s => s.ID == id);
+
+            if (instructorToUpdate == null)
+            {
+                return NotFound();
+            }
+
+            if (await TryUpdateModelAsync<Instructor>(
+                instructorToUpdate,
+                "Instructor",
+                i => i.FirstMidName, i => i.LastName,
+                i => i.HireDate, i => i.OfficeAssignment))
+            {
+                if (string.IsNullOrWhiteSpace(instructorToUpdate.OfficeAssignment?.Location))
+                {
+                    instructorToUpdate.OfficeAssignment = null;
+                }
+                UpdateInstructorCourses(selectedCourses, instructorToUpdate);
+                await _context.SaveChangesAsync();
+                return RedirectToPage("./Index");
+            }
+            UpdateInstructorCourses(selectedCourses, instructorToUpdate);
+            PopulateAssignedCourseData(_context, instructorToUpdate);
+            return Page();
+        }
+
+        public void UpdateInstructorCourses(string[] selectedCourses, Instructor instructorToUpdate)
+        {
+            if (selectedCourses == null)
+            {
+                instructorToUpdate.CourseAssignments = new List<CourseAssignment>();
+                return;
+            }
+
+            var selectedCoursesHS = new HashSet<string>(selectedCourses);
+            var instructorCourses = new HashSet<int>
+                (instructorToUpdate.CourseAssignments.Select(c => c.Course.CourseID));
+            foreach (var course in _context.Courses)
+            {
+                if (selectedCoursesHS.Contains(course.CourseID.ToString()))
+                {
+                    if (!instructorCourses.Contains(course.CourseID))
+                    {
+                        instructorToUpdate.CourseAssignments.Add(
+                            new CourseAssignment
+                            {
+                                InstructorID = instructorToUpdate.ID,
+                                CourseID = course.CourseID
+                            });
+                    }
                 }
                 else
                 {
-                    throw;
+                    if (instructorCourses.Contains(course.CourseID))
+                    {
+                        CourseAssignment courseToRemove = instructorToUpdate.CourseAssignments.FirstOrDefault(
+                                                            i => i.CourseID == course.CourseID);
+
+                        if (courseToRemove != null)
+                        {
+                            _context.Remove(courseToRemove);
+                        }
+                    }
                 }
             }
-
-            return RedirectToPage("./Index");
-        }
-
-        private bool InstructorExists(int id)
-        {
-            return _context.Instructors.Any(e => e.ID == id);
         }
     }
 }

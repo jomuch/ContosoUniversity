@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
 namespace ContosoUniversity.Models
 {
@@ -6,9 +7,10 @@ namespace ContosoUniversity.Models
     {
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int CourseID { get; set; }
-        public string? Title { get; set; }
+        public string Title { get; set; } = null!;
         public int Credits { get; set; }
 
-        public ICollection<Enrollment> Enrollments { get; set; }
+        public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
+        public ICollection<CourseAssignment> CourseAssignments { get; set; } = new List<CourseAssignment>();
     }
 }
