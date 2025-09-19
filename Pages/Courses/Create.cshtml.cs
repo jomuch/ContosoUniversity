@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 
-namespace ContosoUniversity.Pages_Courses
+namespace ContosoUniversity.Pages.Courses
 {
     public class CreateModel : PageModel
     {
@@ -21,24 +21,31 @@ namespace ContosoUniversity.Pages_Courses
 
         public IActionResult OnGet()
         {
+            // This line populates the ViewData with a SelectList of Departments
+            ViewData["DepartmentID"] = new SelectList(_context.Departments, "DepartmentID", "Name");
             return Page();
         }
 
         [BindProperty]
         public Course Course { get; set; } = default!;
 
-        // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
+            var emptyCourse = new Course();
+
+            if (await TryUpdateModelAsync<Course>(
+                emptyCourse,
+                "course",
+                s => s.CourseID, s => s.Credits, s => s.Title, s => s.DepartmentID))
             {
-                return Page();
+                _context.Courses.Add(emptyCourse);
+                await _context.SaveChangesAsync();
+                return RedirectToPage("./Index");
             }
 
-            _context.Courses.Add(Course);
-            await _context.SaveChangesAsync();
-
-            return RedirectToPage("./Index");
+            // Reload the view with the correct department list if the model is not valid
+            ViewData["DepartmentID"] = new SelectList(_context.Departments, "DepartmentID", "Name");
+            return Page();
         }
     }
 }

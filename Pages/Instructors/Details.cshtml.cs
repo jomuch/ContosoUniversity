@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 
-namespace ContosoUniversity.Pages_Instructors
+namespace ContosoUniversity.Pages.Instructors
 {
     public class DetailsModel : PageModel
     {

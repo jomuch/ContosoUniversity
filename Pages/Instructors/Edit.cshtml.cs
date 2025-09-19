@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
 namespace ContosoUniversity.Pages.Instructors
-{
+{ }
+
     public class EditModel : PageModel
     {
         private readonly SchoolContext _context;
@@ -134,4 +135,3 @@ namespace ContosoUniversity.Pages.Instructors
             }
         }
     }
-}

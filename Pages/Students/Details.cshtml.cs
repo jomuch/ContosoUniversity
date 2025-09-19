@@ -30,14 +30,12 @@ namespace ContosoUniversity.Pages.Students
 
             var student = await _context.Students.FirstOrDefaultAsync(m => m.ID == id);
 
-            if (student is not null)
+            if (student == null)
             {
-                Student = student;
-
-                return Page();
+                return NotFound();
             }
-
-            return NotFound();
+            Student = student;
+            return Page();
         }
     }
 }

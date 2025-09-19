@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 
-namespace ContosoUniversity.Pages_Departments
+namespace ContosoUniversity.Pages.Departments
 {
     public class CreateModel : PageModel
     {
@@ -21,14 +21,13 @@ namespace ContosoUniversity.Pages_Departments
 
         public IActionResult OnGet()
         {
-        ViewData["InstructorID"] = new SelectList(_context.Instructors, "ID", "FirstMidName");
+            ViewData["InstructorID"] = new SelectList(_context.Instructors, "ID", "FirstMidName");
             return Page();
         }
 
         [BindProperty]
         public Department Department { get; set; } = default!;
 
-        // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)

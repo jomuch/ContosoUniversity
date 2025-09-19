@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 
-namespace ContosoUniversity.Pages_Departments
+namespace ContosoUniversity.Pages.Departments
 {
     public class EditModel : PageModel
     {
