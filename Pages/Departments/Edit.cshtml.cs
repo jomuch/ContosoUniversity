@@ -21,22 +21,24 @@ namespace ContosoUniversity.Pages.Departments
         [BindProperty]
         public Department Department { get; set; } = default!;
 
+        private void PopulateInstructorsDropDownList()
+        {
+            ViewData["InstructorID"] = new SelectList(_context.Instructors, "ID", "FullName");
+        }
+
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
                 return NotFound();
 
-            // Load the department with administrator included (needed for display/edit)
-            var department = await _context.Departments
+            Department = await _context.Departments
                 .Include(d => d.Administrator)
                 .FirstOrDefaultAsync(m => m.DepartmentID == id);
 
-            if (department == null)
+            if (Department == null)
                 return NotFound();
 
-            Department = department;
-
-            ViewData["InstructorID"] = new SelectList(_context.Instructors, "ID", "FullName");
+            PopulateInstructorsDropDownList();
             return Page();
         }
 
@@ -51,18 +53,16 @@ namespace ContosoUniversity.Pages.Departments
 
             if (departmentToUpdate == null)
             {
-                // Department was deleted by another user
-                var deletedDepartment = new Department();
-                await TryUpdateModelAsync(deletedDepartment);
                 ModelState.AddModelError(string.Empty,
                     "Unable to save. The department was deleted by another user.");
+                PopulateInstructorsDropDownList();
                 return Page();
             }
 
             // Set the original RowVersion value to detect concurrency conflicts
             _context.Entry(departmentToUpdate).Property("RowVersion").OriginalValue = Department.RowVersion;
 
-            if (await TryUpdateModelAsync<Department>(
+            if (await TryUpdateModelAsync(
                 departmentToUpdate,
                 "Department",
                 d => d.Name, d => d.StartDate, d => d.Budget, d => d.InstructorID))
@@ -82,12 +82,12 @@ namespace ContosoUniversity.Pages.Departments
                     {
                         ModelState.AddModelError(string.Empty,
                             "Unable to save. The department was deleted by another user.");
+                        PopulateInstructorsDropDownList();
                         return Page();
                     }
 
                     var databaseValues = (Department)databaseEntry.ToObject();
 
-                    // Show current database values in validation errors
                     if (databaseValues.Name != clientValues.Name)
                         ModelState.AddModelError("Department.Name", $"Current value: {databaseValues.Name}");
                     if (databaseValues.Budget != clientValues.Budget)
@@ -106,13 +106,13 @@ namespace ContosoUniversity.Pages.Departments
                         "The edit operation was canceled and the current values in the database have been displayed. " +
                         "If you still want to edit this record, click the Save button again.");
 
-                    // Update the RowVersion to the new value for the form
+                    // Update RowVersion for redisplay
                     Department.RowVersion = (byte[])databaseValues.RowVersion!;
                     ModelState.Remove("Department.RowVersion");
                 }
             }
 
-            ViewData["InstructorID"] = new SelectList(_context.Instructors, "ID", "FullName");
+            PopulateInstructorsDropDownList();
             return Page();
         }
     }

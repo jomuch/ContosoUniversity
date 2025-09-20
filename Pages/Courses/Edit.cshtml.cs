@@ -1,11 +1,11 @@
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace ContosoUniversity.Pages.Courses
 {
@@ -28,15 +28,15 @@ namespace ContosoUniversity.Pages.Courses
             if (id == null)
                 return NotFound();
 
-            Course? course = await _context.Courses.AsNoTracking().FirstOrDefaultAsync(c => c.CourseID == id);
+            Course = await _context.Courses
+                .Include(c => c.Department)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.CourseID == id);
 
-            if (course == null)
+            if (Course == null)
                 return NotFound();
 
-            Course = course;
-
-            DepartmentList = new SelectList(_context.Departments.OrderBy(d => d.Name), "DepartmentID", "Name");
-
+            DepartmentList = new SelectList(_context.Departments, "DepartmentID", "Name", Course.DepartmentID);
             return Page();
         }
 
@@ -44,11 +44,10 @@ namespace ContosoUniversity.Pages.Courses
         {
             if (!ModelState.IsValid)
             {
-                DepartmentList = new SelectList(_context.Departments.OrderBy(d => d.Name), "DepartmentID", "Name");
+                DepartmentList = new SelectList(_context.Departments, "DepartmentID", "Name", Course.DepartmentID);
                 return Page();
             }
 
-            // Attach and mark entity as modified
             _context.Attach(Course).State = EntityState.Modified;
 
             try
@@ -57,18 +56,13 @@ namespace ContosoUniversity.Pages.Courses
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CourseExists(Course.CourseID))
+                if (!_context.Courses.Any(e => e.CourseID == Course.CourseID))
                     return NotFound();
                 else
                     throw;
             }
 
             return RedirectToPage("./Index");
-        }
-
-        private bool CourseExists(int id)
-        {
-            return _context.Courses.Any(e => e.CourseID == id);
         }
     }
 }

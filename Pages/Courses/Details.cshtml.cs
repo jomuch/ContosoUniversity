@@ -1,9 +1,9 @@
+﻿using System.Threading.Tasks;
+using ContosoUniversity.Data;
+using ContosoUniversity.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using ContosoUniversity.Data;
-using ContosoUniversity.Models;
-using System.Threading.Tasks;
 
 namespace ContosoUniversity.Pages.Courses
 {
@@ -16,7 +16,7 @@ namespace ContosoUniversity.Pages.Courses
             _context = context;
         }
 
-        public Course? Course { get; set; }
+        public Course Course { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -24,7 +24,8 @@ namespace ContosoUniversity.Pages.Courses
                 return NotFound();
 
             Course = await _context.Courses
-                .Include(c => c.Department)
+                .Include(c => c.Department)   // ✅ load Department
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.CourseID == id);
 
             if (Course == null)

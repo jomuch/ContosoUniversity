@@ -1,20 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using ContosoUniversity.Data;
+using ContosoUniversity.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using ContosoUniversity.Data;
-using ContosoUniversity.Models;
 
 namespace ContosoUniversity.Pages.Courses
 {
     public class DeleteModel : PageModel
     {
-        private readonly ContosoUniversity.Data.SchoolContext _context;
+        private readonly SchoolContext _context;
 
-        public DeleteModel(ContosoUniversity.Data.SchoolContext context)
+        public DeleteModel(SchoolContext context)
         {
             _context = context;
         }
@@ -25,34 +22,29 @@ namespace ContosoUniversity.Pages.Courses
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var course = await _context.Courses.FirstOrDefaultAsync(m => m.CourseID == id);
+            Course = await _context.Courses
+                .Include(c => c.Department)  // ✅ ensure Department is loaded
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.CourseID == id);
 
-            if (course is not null)
-            {
-                Course = course;
+            if (Course == null)
+                return NotFound();
 
-                return Page();
-            }
-
-            return NotFound();
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var course = await _context.Courses.FindAsync(id);
+            Course? course = await _context.Courses.FindAsync(id);
+
             if (course != null)
             {
-                Course = course;
-                _context.Courses.Remove(Course);
+                _context.Courses.Remove(course);
                 await _context.SaveChangesAsync();
             }
 
