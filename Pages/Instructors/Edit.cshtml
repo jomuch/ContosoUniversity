@@ -1,25 +1,72 @@
-<div class="form-group">
-                <div class="table">
-                    <table>
-                        <tr>
-                            @{
-                                int cnt = 0;
-                                foreach (var course in Model.AssignedCourseDataList)
-                                {
-                                    if (cnt++ % 3 == 0)
-                                    {
-                                        @:</tr><tr>
-                                    }
-                                    @:<td>
-                                        <input type="checkbox"
-                                               name="selectedCourses"
-                                               value="@course.CourseID"
-                                               @(Html.Raw(course.Assigned ? "checked=\"checked\"" : "")) />
-                                               @course.CourseID @:  @course.Title
-                                    @:</td>
-                                }
-                                @:</tr>
-                            }
-                        </table>
+@page "{id:int}"
+@model ContosoUniversity.Pages.Instructors.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Instructor</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <input type="hidden" asp-for="Instructor.ID" />
+
+            <div class="form-group">
+                <label asp-for="Instructor.LastName" class="control-label"></label>
+                <input asp-for="Instructor.LastName" class="form-control" />
+                <span asp-validation-for="Instructor.LastName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Instructor.FirstMidName" class="control-label"></label>
+                <input asp-for="Instructor.FirstMidName" class="form-control" />
+                <span asp-validation-for="Instructor.FirstMidName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Instructor.HireDate" class="control-label"></label>
+                <input asp-for="Instructor.HireDate" class="form-control" />
+                <span asp-validation-for="Instructor.HireDate" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Instructor.OfficeAssignment.Location" class="control-label"></label>
+                <input asp-for="Instructor.OfficeAssignment.Location" class="form-control" />
+                <span asp-validation-for="Instructor.OfficeAssignment.Location" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">Courses</label>
+                <div>
+                    @foreach (var course in Model.AssignedCourseDataList)
+                    {
+                        <div class="form-check">
+                            <input type="checkbox"
+                                   name="selectedCourses"
+                                   value="@course.CourseID"
+                                   checked="@course.Assigned"
+                                   class="form-check-input" />
+                            <label class="form-check-label">@course.CourseID @course.Title</label>
+                        </div>
+                    }
                 </div>
             </div>
+
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+                <a asp-page="./Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

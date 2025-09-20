@@ -1,5 +1,13 @@
-﻿@page
+﻿
+@page
 @model ContosoUniversity.Pages.Students.IndexModel
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
 
 @{
     ViewData["Title"] = "Index";
