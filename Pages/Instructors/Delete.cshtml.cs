@@ -1,20 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using ContosoUniversity.Data;
+using ContosoUniversity.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using ContosoUniversity.Data;
-using ContosoUniversity.Models;
 
 namespace ContosoUniversity.Pages.Instructors
 {
     public class DeleteModel : PageModel
     {
-        private readonly ContosoUniversity.Data.SchoolContext _context;
+        private readonly SchoolContext _context;
 
-        public DeleteModel(ContosoUniversity.Data.SchoolContext context)
+        public DeleteModel(SchoolContext context)
         {
             _context = context;
         }
@@ -22,41 +19,51 @@ namespace ContosoUniversity.Pages.Instructors
         [BindProperty]
         public Instructor Instructor { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(int? id)
+        // holds the error message if delete fails
+        [TempData]
+        public string? ErrorMessage { get; set; }
+
+        public async Task<IActionResult> OnGetAsync(int? id, bool? saveChangesError = false)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var instructor = await _context.Instructors.FirstOrDefaultAsync(m => m.ID == id);
+            Instructor = await _context.Instructors
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.ID == id);
 
-            if (instructor is not null)
+            if (Instructor == null)
+                return NotFound();
+
+            if (saveChangesError.GetValueOrDefault())
             {
-                Instructor = instructor;
-
-                return Page();
+                ErrorMessage = "Delete failed. The instructor may be assigned as administrator of a department.";
             }
 
-            return NotFound();
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var instructor = await _context.Instructors.FindAsync(id);
-            if (instructor != null)
-            {
-                Instructor = instructor;
-                _context.Instructors.Remove(Instructor);
-                await _context.SaveChangesAsync();
-            }
 
-            return RedirectToPage("./Index");
+            if (instructor == null)
+                return NotFound();
+
+            try
+            {
+                _context.Instructors.Remove(instructor);
+                await _context.SaveChangesAsync();
+                return RedirectToPage("./Index");
+            }
+            catch (DbUpdateException)
+            {
+                // Redirect back to page with error flag
+                return RedirectToAction("./Delete", new { id, saveChangesError = true });
+            }
         }
     }
 }

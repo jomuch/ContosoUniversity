@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
+using ContosoUniversity.Data;
+using ContosoUniversity.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using ContosoUniversity.Data;
-using ContosoUniversity.Models;
 
 namespace ContosoUniversity.Pages.Departments
 {
@@ -17,16 +17,15 @@ namespace ContosoUniversity.Pages.Departments
         }
 
         [BindProperty]
-        public Department? Department { get; set; }
+        public Department Department { get; set; } = default!;
 
-        public string? ConcurrencyError { get; set; }
+        [TempData]
+        public string? ErrorMessage { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int? id, bool? concurrencyError)
+        public async Task<IActionResult> OnGetAsync(int? id, bool? saveChangesError = false)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             Department = await _context.Departments
                 .Include(d => d.Administrator)
@@ -34,38 +33,35 @@ namespace ContosoUniversity.Pages.Departments
                 .FirstOrDefaultAsync(m => m.DepartmentID == id);
 
             if (Department == null)
-            {
                 return NotFound();
-            }
 
-            if (concurrencyError.GetValueOrDefault())
+            if (saveChangesError.GetValueOrDefault())
             {
-                ConcurrencyError = "The record you attempted to delete was modified by another user after you got the original values. " +
-                                 "The delete operation was canceled. If you still want to delete this record, click the Delete button again.";
+                ErrorMessage = "Delete failed. You must remove or reassign related courses before deleting this department.";
             }
 
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(int id)
+        public async Task<IActionResult> OnPostAsync(int? id)
         {
+            if (id == null)
+                return NotFound();
+
+            var department = await _context.Departments.FindAsync(id);
+
+            if (department == null)
+                return NotFound();
+
             try
             {
-                var departmentToDelete = await _context.Departments.FindAsync(id);
-
-                if (departmentToDelete == null)
-                {
-                    return NotFound();
-                }
-
-                _context.Departments.Remove(departmentToDelete);
+                _context.Departments.Remove(department);
                 await _context.SaveChangesAsync();
-
                 return RedirectToPage("./Index");
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateException)
             {
-                return RedirectToPage("./Delete", new { concurrencyError = true, id });
+                return RedirectToAction("./Delete", new { id, saveChangesError = true });
             }
         }
     }
