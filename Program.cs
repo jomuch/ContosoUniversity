@@ -1,39 +1,35 @@
 using Microsoft.EntityFrameworkCore;
-using ContosoUniversity.Data;
 using Microsoft.Extensions.DependencyInjection;
+using ContosoUniversity.Data;
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-
-// Configure the database context
 builder.Services.AddDbContext<SchoolContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolContext")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolContext") ?? throw new InvalidOperationException("Connection string 'SchoolContext' not found.")));
 
-// Add database developer page exception filter for detailed error pages in development
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 var app = builder.Build();
 
-
-// This is the updated section that creates and seeds the database
+// This is the new code to add
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
     try
     {
         var context = services.GetRequiredService<SchoolContext>();
+        context.Database.Migrate(); // Ensures the database is created and migrated
 
-        // This line tells EF Core to create the database if it doesn't exist.
-        context.Database.Migrate();
+        logger.LogInformation("--- Seeding database from XML ---");
 
-        // Now the seeder will run against the newly created database.
         ContosoUniversity.Data.DbInitializer.InitializeFromXml(context, "Data/SeedData.xml");
     }
     catch (Exception ex)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "An error occurred while creating or seeding the DB.");
     }
 }
@@ -62,3 +58,4 @@ app.UseAuthorization();
 app.MapRazorPages();
 
 app.Run();
+
