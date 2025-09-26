@@ -1,8 +1,8 @@
-﻿using ContosoUniversity.Models;
+using ContosoUniversity.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
-using ContosoUniversity.Data;
-using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace ContosoUniversity.Data
 {
@@ -10,94 +10,108 @@ namespace ContosoUniversity.Data
     {
         public static void Initialize(SchoolContext context)
         {
-            context.Database.EnsureCreated();
-
             if (context.Students.Any())
             {
-                return;   // DB has been seeded
+                return;
+            }
+        }
+
+        public static void InitializeFromXml(SchoolContext context, String xmlFile)
+        {
+            if (context.Students.Any())
+            {
+                return;
             }
 
-            var students = new Student[]
-            {
-                new Student{FirstMidName="Carson",LastName="Alexander",EnrollmentDate=DateTime.Parse("2019-09-01")},
-                new Student{FirstMidName="Meredith",LastName="Alonso",EnrollmentDate=DateTime.Parse("2017-09-01")},
-                new Student{FirstMidName="Arturo",LastName="Anand",EnrollmentDate=DateTime.Parse("2018-09-01")},
-                new Student{FirstMidName="Gytis",LastName="Barzdukas",EnrollmentDate=DateTime.Parse("2017-09-01")},
-                new Student{FirstMidName="Yan",LastName="Li",EnrollmentDate=DateTime.Parse("2017-09-01")},
-                new Student{FirstMidName="Peggy",LastName="Justice",EnrollmentDate=DateTime.Parse("2016-09-01")},
-                new Student{FirstMidName="Laura",LastName="Norman",EnrollmentDate=DateTime.Parse("2018-09-01")},
-                new Student{FirstMidName="Nino",LastName="Olivetto",EnrollmentDate=DateTime.Parse("2019-09-01")}
-            };
-            context.Students.AddRange(students);
+            XDocument doc = XDocument.Load(xmlFile);
 
-            var instructors = new Instructor[]
+            var students = doc.Descendants("student").Select(s => new Student
             {
-                new Instructor { FirstMidName = "Kim",     LastName = "Abercrombie", HireDate = DateTime.Parse("1995-03-11") },
-                new Instructor { FirstMidName = "Fadi",    LastName = "Fakhouri",    HireDate = DateTime.Parse("2002-07-06") },
-                new Instructor { FirstMidName = "Roger",   LastName = "Harui",       HireDate = DateTime.Parse("1998-07-01") },
-                new Instructor { FirstMidName = "Candace", LastName = "Kapoor",      HireDate = DateTime.Parse("2001-01-15") },
-                new Instructor { FirstMidName = "Roger",   LastName = "Zheng",       HireDate = DateTime.Parse("2004-02-12") }
-            };
-            context.Instructors.AddRange(instructors);
+                ID = int.Parse(s.Element("ID").Value),
+                LastName = s.Element("LastName").Value,
+                FirstMidName = s.Element("FirstMidName").Value,
+                EnrollmentDate = DateTime.Parse(s.Element("EnrollmentDate").Value)
+            }).ToArray();
 
-            var departments = new Department[]
+            var instructors = doc.Descendants("instructor").Select(i => new Instructor
             {
-                new Department { Name = "English",     Budget = 350000, StartDate = DateTime.Parse("2007-09-01"), Administrator = instructors.Single( i => i.LastName == "Abercrombie") },
-                new Department { Name = "Mathematics", Budget = 100000, StartDate = DateTime.Parse("2007-09-01"), Administrator = instructors.Single( i => i.LastName == "Fakhouri") },
-                new Department { Name = "Engineering", Budget = 350000, StartDate = DateTime.Parse("2007-09-01"), Administrator = instructors.Single( i => i.LastName == "Harui") },
-                new Department { Name = "Economics",   Budget = 100000, StartDate = DateTime.Parse("2007-09-01"), Administrator = instructors.Single( i => i.LastName == "Kapoor") }
-            };
-            context.Departments.AddRange(departments);
+                ID = int.Parse(i.Element("ID").Value),
+                LastName = i.Element("LastName").Value,
+                FirstMidName = i.Element("FirstMidName").Value,
+                HireDate = DateTime.Parse(i.Element("HireDate").Value)
+            }).ToArray();
 
-            var courses = new Course[]
+            var departments = doc.Descendants("department").Select(d => new Department
             {
-                new Course {CourseID = 1050, Title = "Chemistry",      Credits = 3, Department = departments.Single( s => s.Name == "Engineering") },
-                new Course {CourseID = 4022, Title = "Microeconomics", Credits = 3, Department = departments.Single( s => s.Name == "Economics") },
-                new Course {CourseID = 4041, Title = "Macroeconomics", Credits = 3, Department = departments.Single( s => s.Name == "Economics") },
-                new Course {CourseID = 1045, Title = "Calculus",       Credits = 4, Department = departments.Single( s => s.Name == "Mathematics") },
-                new Course {CourseID = 3141, Title = "Trigonometry",   Credits = 4, Department = departments.Single( s => s.Name == "Mathematics") },
-                new Course {CourseID = 2021, Title = "Composition",    Credits = 3, Department = departments.Single( s => s.Name == "English") },
-                new Course {CourseID = 2042, Title = "Literature",     Credits = 4, Department = departments.Single( s => s.Name == "English") },
-            };
-            context.Courses.AddRange(courses);
+                DepartmentID = int.Parse(d.Element("DepartmentID").Value),
+                Name = d.Element("Name").Value,
+                Budget = decimal.Parse(d.Element("Budget").Value),
+                StartDate = DateTime.Parse(d.Element("StartDate").Value),
+                InstructorID = int.Parse(d.Element("InstructorID").Value)
+            }).ToArray();
 
-            var officeAssignments = new OfficeAssignment[]
+            var courses = doc.Descendants("course").Select(c => new Course
             {
-                new OfficeAssignment { Instructor = instructors.Single( i => i.LastName == "Fakhouri"), Location = "Gowan 27" },
-                new OfficeAssignment { Instructor = instructors.Single( i => i.LastName == "Harui"), Location = "Thompson 304" },
-            };
-            context.OfficeAssignments.AddRange(officeAssignments);
+                CourseID = int.Parse(c.Element("CourseID").Value),
+                Title = c.Element("Title").Value,
+                Credits = int.Parse(c.Element("Credits").Value),
+                DepartmentID = int.Parse(c.Element("DepartmentID").Value)
+            }).ToArray();
 
-            var courseAssignments = new CourseAssignment[]
+            var officeAssignments = doc.Descendants("officeAssignment").Select(oa => new OfficeAssignment
             {
-                new CourseAssignment { Course = courses.Single(c => c.Title == "Chemistry" ), Instructor = instructors.Single(i => i.LastName == "Abercrombie") },
-                new CourseAssignment { Course = courses.Single(c => c.Title == "Microeconomics" ), Instructor = instructors.Single(i => i.LastName == "Fakhouri") },
-                new CourseAssignment { Course = courses.Single(c => c.Title == "Macroeconomics" ), Instructor = instructors.Single(i => i.LastName == "Harui") },
-                new CourseAssignment { Course = courses.Single(c => c.Title == "Calculus" ), Instructor = instructors.Single(i => i.LastName == "Harui") },
-                new CourseAssignment { Course = courses.Single(c => c.Title == "Trigonometry" ), Instructor = instructors.Single(i => i.LastName == "Harui") },
-                new CourseAssignment { Course = courses.Single(c => c.Title == "Composition" ), Instructor = instructors.Single(i => i.LastName == "Harui") },
-                new CourseAssignment { Course = courses.Single(c => c.Title == "Literature" ), Instructor = instructors.Single(i => i.LastName == "Harui") },
-            };
-            context.CourseAssignments.AddRange(courseAssignments);
+                InstructorID = int.Parse(oa.Element("InstructorID").Value),
+                Location = oa.Element("Location").Value
+            }).ToArray();
 
-            var enrollments = new Enrollment[]
+            var courseAssignments = doc.Descendants("courseAssignment").Select(ca => new CourseAssignment
             {
-                new Enrollment { Student = students.Single(s => s.LastName == "Alexander" ), Course = courses.Single(c => c.Title == "Chemistry" ), Grade = Grade.A },
-                new Enrollment { Student = students.Single(s => s.LastName == "Alexander" ), Course = courses.Single(c => c.Title == "Microeconomics" ), Grade = Grade.C },
-                new Enrollment { Student = students.Single(s => s.LastName == "Alexander" ), Course = courses.Single(c => c.Title == "Macroeconomics" ), Grade = Grade.B },
-                new Enrollment { Student = students.Single(s => s.LastName == "Alonso" ), Course = courses.Single(c => c.Title == "Calculus" ), Grade = Grade.B },
-                new Enrollment { Student = students.Single(s => s.LastName == "Alonso" ), Course = courses.Single(c => c.Title == "Trigonometry" ), Grade = Grade.F },
-                new Enrollment { Student = students.Single(s => s.LastName == "Alonso" ), Course = courses.Single(c => c.Title == "Composition" ), Grade = Grade.F },
-                new Enrollment { Student = students.Single(s => s.LastName == "Anand" ), Course = courses.Single(c => c.Title == "Chemistry" )},
-                new Enrollment { Student = students.Single(s => s.LastName == "Barzdukas" ), Course = courses.Single(c => c.Title == "Chemistry" )},
-                new Enrollment { Student = students.Single(s => s.LastName == "Barzdukas" ), Course = courses.Single(c => c.Title == "Microeconomics" ), Grade = Grade.F },
-                new Enrollment { Student = students.Single(s => s.LastName == "Li" ), Course = courses.Single(c => c.Title == "Macroeconomics" ), Grade = Grade.C },
-                new Enrollment { Student = students.Single(s => s.LastName == "Justice" ), Course = courses.Single(c => c.Title == "Calculus" )},
-                new Enrollment { Student = students.Single(s => s.LastName == "Norman" ), Course = courses.Single(c => c.Title == "Trigonometry" ), Grade = Grade.A },
-            };
-            context.Enrollments.AddRange(enrollments);
+                CourseID = int.Parse(ca.Element("CourseID").Value),
+                InstructorID = int.Parse(ca.Element("InstructorID").Value)
+            }).ToArray();
 
-            context.SaveChanges();
+            var enrollments = doc.Descendants("enrollment").Select(e => new Enrollment
+            {
+                StudentID = int.Parse(e.Element("StudentID").Value),
+                CourseID = int.Parse(e.Element("CourseID").Value),
+                Grade = e.Element("Grade") != null ? Enum.Parse<Grade>(e.Element("Grade").Value) : (Grade?)null
+            }).ToArray();
+
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    context.Students.AddRange(students);
+                    context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Student ON;");
+                    context.SaveChanges();
+                    context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Student OFF;");
+
+                    context.Instructors.AddRange(instructors);
+                    context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Instructor ON;");
+                    context.SaveChanges();
+                    context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Instructor OFF;");
+
+                    context.Departments.AddRange(departments);
+                    context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Department ON;");
+                    context.SaveChanges();
+                    context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.Department OFF;");
+
+                    context.Courses.AddRange(courses);
+                    context.OfficeAssignments.AddRange(officeAssignments);
+                    context.CourseAssignments.AddRange(courseAssignments);
+                    context.Enrollments.AddRange(enrollments);
+
+                    context.SaveChanges();
+
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
         }
     }
 }
+
