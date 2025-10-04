@@ -39,9 +39,10 @@
 		<student>
 			<ID>7</ID>
 			<FirstMidName>Laura</FirstMidName>
-			<LastName>Norman</LastName>
-			<EnrollmentDate>2018-09-01</EnrollmentDate>
-		</student>
+			<LastName>
+				Norman</FirstMidName>
+				<EnrollmentDate>2018-09-01</EnrollmentDate>
+			</student>
 		<student>
 			<ID>8</ID>
 			<FirstMidName>Nino</FirstMidName>
@@ -168,6 +169,11 @@
 			<InstructorID>2</InstructorID>
 			<Location>Gates 202</Location>
 		</officeAssignment>
+		<!-- Adding more office assignments to fill out instructors -->
+		<officeAssignment>
+			<InstructorID>3</InstructorID>
+			<Location>Taylor 301</Location>
+		</officeAssignment>
 	</officeAssignments>
 
 	<courseAssignments>
@@ -177,6 +183,27 @@
 		</courseAssignment>
 		<courseAssignment>
 			<CourseID>1045</CourseID>
+			<InstructorID>2</InstructorID>
+		</courseAssignment>
+		<!-- Assigning more courses to instructors -->
+		<courseAssignment>
+			<CourseID>4022</CourseID>
+			<InstructorID>3</InstructorID>
+		</courseAssignment>
+		<courseAssignment>
+			<CourseID>4041</CourseID>
+			<InstructorID>4</InstructorID>
+		</courseAssignment>
+		<courseAssignment>
+			<CourseID>3141</CourseID>
+			<InstructorID>5</InstructorID>
+		</courseAssignment>
+		<courseAssignment>
+			<CourseID>2021</CourseID>
+			<InstructorID>1</InstructorID>
+		</courseAssignment>
+		<courseAssignment>
+			<CourseID>2042</CourseID>
 			<InstructorID>2</InstructorID>
 		</courseAssignment>
 	</courseAssignments>
@@ -197,6 +224,36 @@
 			<CourseID>4041</CourseID>
 			<Grade>B</Grade>
 		</enrollment>
+		<!-- Added enrollments for remaining students -->
+		<enrollment>
+			<StudentID>4</StudentID>
+			<CourseID>1045</CourseID>
+			<Grade>A</Grade>
+		</enrollment>
+		<enrollment>
+			<StudentID>4</StudentID>
+			<CourseID>3141</CourseID>
+			<!-- Student Gytis Barzdukas (ID 4) enrolled, no grade yet -->
+		</enrollment>
+		<enrollment>
+			<StudentID>5</StudentID>
+			<CourseID>2021</CourseID>
+			<Grade>B</Grade>
+		</enrollment>
+		<enrollment>
+			<StudentID>6</StudentID>
+			<CourseID>2042</CourseID>
+			<Grade>C</Grade>
+		</enrollment>
+		<enrollment>
+			<StudentID>7</StudentID>
+			<CourseID>1050</CourseID>
+			<Grade>F</Grade>
+		</enrollment>
+		<enrollment>
+			<StudentID>8</StudentID>
+			<CourseID>4041</CourseID>
+			<!-- Student Nino Olivetto (ID 8) enrolled, no grade yet -->
+		</enrollment>
 	</enrollments>
 </School>
-

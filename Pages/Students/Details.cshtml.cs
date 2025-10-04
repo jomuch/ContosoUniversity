@@ -1,3 +1,4 @@
+using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -9,10 +10,10 @@ namespace ContosoUniversity.Pages.Students
 {
     public class DetailsModel : PageModel
     {
-        private readonly ContosoUniversity.Data.SchoolContext _context;
+        private readonly SchoolContext _context;
         private readonly ILogger<DetailsModel> _logger;
 
-        public DetailsModel(ContosoUniversity.Data.SchoolContext context, ILogger<DetailsModel> logger)
+        public DetailsModel(SchoolContext context, ILogger<DetailsModel> logger)
         {
             _context = context;
             _logger = logger;
@@ -27,7 +28,8 @@ namespace ContosoUniversity.Pages.Students
                 return NotFound();
             }
 
-            _logger.LogInformation("Viewing details for Student ID: {StudentId}", id);
+            // This is the structured log message
+            _logger.LogInformation("Getting details for Student ID: {StudentId} at {Time}", id, System.DateTime.UtcNow);
 
             Student = await _context.Students
                 .Include(s => s.Enrollments)
@@ -44,3 +46,4 @@ namespace ContosoUniversity.Pages.Students
         }
     }
 }
+

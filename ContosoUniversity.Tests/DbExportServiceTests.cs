@@ -1,16 +1,16 @@
+using ContosoUniversity.Services;
 using ContosoUniversity.Data;
-using ContosoUniversity.Models; 
-using Microsoft.EntityFrameworkCore; 
-using Moq; 
+using ContosoUniversity.Models;
+using ContosoUniversity.Tests;
+using Microsoft.EntityFrameworkCore;
 using System; 
 using System.Linq; 
-using System.Xml.Linq; 
-using Xunit;
+using System.Xml.Linq;
 
 namespace ContosoUniversity.Tests {
     public class DbExportServiceTests {
         private readonly DbContextOptions<SchoolContext> _options;
-        public DbExportServiceTests() { _options = new DbContextOptionsBuilder<SchoolContext>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options; }
+        public DbExportServiceTests() => _options = new DbContextOptionsBuilder<SchoolContext>().UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
         [Fact]
         public void ExportToXml_WithData_CreatesCorrectRootElement() {
             using (var context = new SchoolContext(_options)) {
@@ -18,7 +18,7 @@ namespace ContosoUniversity.Tests {
                 context.SaveChanges();
                 var service = new DbExportService(context);
                 XDocument result = service.ExportToXml();
-                Assert.NotNull(result); Assert.Equal("School", result.Root.Name);
+                Assert.NotNull(result); Assert.Equal("School", actual: result.Root.Name);
             }
         }
         [Fact]
