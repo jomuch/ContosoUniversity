@@ -1,35 +1,45 @@
-﻿using System.Threading.Tasks;
+using ContosoUniversity.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using ContosoUniversity.Data;
-using ContosoUniversity.Models;
+using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace ContosoUniversity.Pages.Students
 {
     public class DetailsModel : PageModel
     {
-        private readonly SchoolContext _context;
+        private readonly ContosoUniversity.Data.SchoolContext _context;
+        private readonly ILogger<DetailsModel> _logger;
 
-        public DetailsModel(SchoolContext context)
+        public DetailsModel(ContosoUniversity.Data.SchoolContext context, ILogger<DetailsModel> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
-        public Student Student { get; set; } = default!;
+        public Student Student { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            _logger.LogInformation("Viewing details for Student ID: {StudentId}", id);
 
             Student = await _context.Students
                 .Include(s => s.Enrollments)
-                    .ThenInclude(e => e.Course)
+                .ThenInclude(e => e.Course)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(s => s.ID == id);
+                .FirstOrDefaultAsync(m => m.ID == id);
 
-            if (Student == null) return NotFound();
-
+            if (Student == null)
+            {
+                _logger.LogWarning("Student with ID: {StudentId} not found.", id);
+                return NotFound();
+            }
             return Page();
         }
     }

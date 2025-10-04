@@ -1,7 +1,8 @@
+using ContosoUniversity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using ContosoUniversity.Data;
 using Microsoft.Extensions.Logging;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,9 +13,13 @@ builder.Services.AddDbContext<SchoolContext>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+// Register the new service for Week 7
+builder.Services.AddScoped<IDbExportService, DbExportService>();
+
+
 var app = builder.Build();
 
-// This is the new code to add
+// Seed the database
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -26,7 +31,7 @@ using (var scope = app.Services.CreateScope())
 
         logger.LogInformation("--- Seeding database from XML ---");
 
-        ContosoUniversity.Data.DbInitializer.InitializeFromXml(context, "Data/SeedData.xml");
+        DbInitializer.InitializeFromXml(context, @"Data/SeedData.xml");
     }
     catch (Exception ex)
     {
@@ -58,4 +63,7 @@ app.UseAuthorization();
 app.MapRazorPages();
 
 app.Run();
+
+// Add this line to make the Program class visible to the test project
+public partial class Program { }
 
