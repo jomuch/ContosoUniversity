@@ -1,4 +1,5 @@
-﻿using ContosoUniversity;
+﻿using ContosoUniversity.Data;
+using ContosoUniversity.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -7,25 +8,46 @@ using System.Linq;
 
 namespace ContosoUniversity.Tests
 {
-    public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup : class
+    public class CustomWebApplicationFactory<TProgram>
+        : WebApplicationFactory<TProgram> where TProgram : class
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
+            builder.UseEnvironment("Testing");
+
             builder.ConfigureServices(services =>
             {
-                // Remove existing DbContext registration
                 var descriptor = services.SingleOrDefault(
-                    d => d.ServiceType == typeof(DbContextOptions<ContosoUniversity.Data.SchoolContext>));
-                if (descriptor != null)
-                {
-                    services.Remove(descriptor);
-                }
+                    d => d.ServiceType == typeof(DbContextOptions<SchoolContext>));
 
-                // Add in-memory database for testing
-                services.AddDbContext<ContosoUniversity.Data.SchoolContext>(options =>
+                if (descriptor != null)
+                    services.Remove(descriptor);
+
+                services.AddDbContext<SchoolContext>(options =>
+                    options.UseInMemoryDatabase("TestDb"));
+
+                var sp = services.BuildServiceProvider();
+
+                using (var scope = sp.CreateScope())
                 {
-                    options.UseInMemoryDatabase("InMemorySchoolTest");
-                });
+                    var scopedServices = scope.ServiceProvider;
+                    var db = scopedServices.GetRequiredService<SchoolContext>();
+
+                    db.Database.EnsureCreated();
+
+                    // ✅ Seed test data
+                    if (!db.Students.Any())
+                    {
+                        db.Students.Add(new Student
+                        {
+                            ID = 1,
+                            FirstMidName = "Test",
+                            LastName = "Student",
+                            EnrollmentDate = DateTime.UtcNow
+                        });
+                        db.SaveChanges();
+                    }
+                }
             });
         }
     }

@@ -7,8 +7,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 
-builder.Services.AddDbContext<SchoolContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+if (builder.Environment.EnvironmentName == "Testing")
+{
+    builder.Services.AddDbContext<SchoolContext>(options =>
+        options.UseInMemoryDatabase("TestDb"));
+}
+else
+{
+    builder.Services.AddDbContext<SchoolContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
 
 builder.Services.AddScoped<ICourseService, DbExportService>();
 
@@ -49,4 +57,5 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
-public partial class Program { } // needed for WebApplicationFactory
+
+public partial class Program { }
