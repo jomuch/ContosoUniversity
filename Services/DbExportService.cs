@@ -1,8 +1,8 @@
-﻿using ContosoUniversity.Data;
+using ContosoUniversity.Data;
 using ContosoUniversity.Models;
-using System.Xml.Linq;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace ContosoUniversity.Services
 {
@@ -15,15 +15,9 @@ namespace ContosoUniversity.Services
             _context = context;
         }
 
-        public IEnumerable<Course> GetAllCourses()
-        {
-            return _context.Courses.ToList();
-        }
+        public IEnumerable<Course> GetAllCourses() => _context.Courses.ToList();
 
-        public Course? GetCourseById(int id)
-        {
-            return _context.Courses.FirstOrDefault(c => c.CourseID == id);
-        }
+        public Course? GetCourseById(int id) => _context.Courses.FirstOrDefault(c => c.CourseID == id);
 
         public XDocument ExportToXml()
         {

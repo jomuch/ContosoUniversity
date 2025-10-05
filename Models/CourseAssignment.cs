@@ -2,9 +2,11 @@
 {
     public class CourseAssignment
     {
-        public int InstructorID { get; set; }
         public int CourseID { get; set; }
-        public Instructor Instructor { get; set; } = null!;
+        public int InstructorID { get; set; }
+
+        // Navigation properties
         public Course Course { get; set; } = null!;
+        public Instructor Instructor { get; set; } = null!;
     }
 }

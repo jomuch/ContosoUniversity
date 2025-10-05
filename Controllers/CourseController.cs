@@ -1,4 +1,5 @@
-﻿using ContosoUniversity.Services;
+﻿using ContosoUniversity.Models;
+using ContosoUniversity.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -21,23 +22,14 @@ namespace ContosoUniversity.Controllers
         public IActionResult Get(int id)
         {
             _logger.LogInformation("Fetching course with id {CourseID}", id);
-            
             var course = _courseService.GetCourseById(id);
-
             if (course == null)
             {
                 _logger.LogWarning("Course with id {CourseID} not found", id);
                 return NotFound();
             }
 
-            // Structured logging with property names (required for assignment)
-            _logger.LogInformation("Returning course {@Course}", new 
-            {
-                course.CourseID,
-                course.Title,
-                course.Department
-            });
-
+            _logger.LogInformation("Returning course {@Course}", new { course.CourseID, course.Title, course.Department });
             return Ok(course);
         }
     }

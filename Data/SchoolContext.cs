@@ -1,4 +1,4 @@
-using ContosoUniversity.Models;
+﻿using ContosoUniversity.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ContosoUniversity.Data
@@ -10,34 +10,34 @@ namespace ContosoUniversity.Data
         {
         }
 
-        public DbSet<Student> Students { get; set; }
-        public DbSet<Enrollment> Enrollments { get; set; }
-        public DbSet<Course> Courses { get; set; }
-        public DbSet<Department> Departments { get; set; }
-        public DbSet<Instructor> Instructors { get; set; }
-        public DbSet<OfficeAssignment> OfficeAssignments { get; set; }
-        public DbSet<CourseAssignment> CourseAssignments { get; set; }
+        public DbSet<Student> Students { get; set; } = null!;
+        public DbSet<Course> Courses { get; set; } = null!;
+        public DbSet<Enrollment> Enrollments { get; set; } = null!;
+        public DbSet<Instructor> Instructors { get; set; } = null!;
+        public DbSet<Department> Departments { get; set; } = null!;
+        public DbSet<OfficeAssignment> OfficeAssignments { get; set; } = null!;
+        public DbSet<CourseAssignment> CourseAssignments { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Table mappings
-            modelBuilder.Entity<Course>().ToTable("Course");
-            modelBuilder.Entity<Enrollment>().ToTable("Enrollment");
-            modelBuilder.Entity<Student>().ToTable("Student");
-            modelBuilder.Entity<Department>().ToTable("Department");
-            modelBuilder.Entity<Instructor>().ToTable("Instructor");
-            modelBuilder.Entity<OfficeAssignment>().ToTable("OfficeAssignment");
-            modelBuilder.Entity<CourseAssignment>().ToTable("CourseAssignment");
+            base.OnModelCreating(modelBuilder);
 
-            // Composite key
+            // Configure composite primary key for CourseAssignment (many-to-many)
             modelBuilder.Entity<CourseAssignment>()
-                .HasKey(c => new { c.CourseID, c.InstructorID });
+                .HasKey(ca => new { ca.CourseID, ca.InstructorID });
 
-            // Concurrency token for Department.RowVersion
-            modelBuilder.Entity<Department>()
-                .Property(d => d.RowVersion)
-                .IsRowVersion()
-                .IsConcurrencyToken();
+            // Configure one-to-one relationship between Instructor and OfficeAssignment
+            modelBuilder.Entity<Instructor>()
+                .HasOne(i => i.OfficeAssignment)
+                .WithOne(o => o.Instructor)
+                .HasForeignKey<OfficeAssignment>(o => o.InstructorID);
+
+            // Optional: Configure string length for Course.Title
+            modelBuilder.Entity<Course>()
+                .Property(c => c.Title)
+                .HasMaxLength(50);
+
+            // Optional: seed data can go here if needed
         }
     }
 }

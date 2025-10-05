@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ContosoUniversity.Models
 {
@@ -10,29 +9,23 @@ namespace ContosoUniversity.Models
         public int ID { get; set; }
 
         [Required]
-        [Display(Name = "Last Name")]
         [StringLength(50)]
         public string LastName { get; set; } = null!;
 
         [Required]
-        [Column("FirstName")]
         [Display(Name = "First Name")]
         [StringLength(50)]
         public string FirstMidName { get; set; } = null!;
 
         [DataType(DataType.Date)]
-        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         [Display(Name = "Hire Date")]
         public DateTime HireDate { get; set; }
 
-        [Display(Name = "Full Name")]
-        public string FullName => LastName + ", " + FirstMidName;
-
+        // Navigation properties
         public ICollection<CourseAssignment> CourseAssignments { get; set; } = new List<CourseAssignment>();
-
         public OfficeAssignment? OfficeAssignment { get; set; }
 
-        // This is the missing navigation property
-        public ICollection<Department>? Departments { get; set; }
+        // Helper property
+        public string FullName => $"{FirstMidName} {LastName}";
     }
 }

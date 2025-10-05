@@ -1,5 +1,6 @@
-﻿using ContosoUniversity.Models;
+using ContosoUniversity.Models;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace ContosoUniversity.Services
 {
@@ -7,5 +8,6 @@ namespace ContosoUniversity.Services
     {
         IEnumerable<Course> GetAllCourses();
         Course? GetCourseById(int id);
+        XDocument ExportToXml();
     }
 }

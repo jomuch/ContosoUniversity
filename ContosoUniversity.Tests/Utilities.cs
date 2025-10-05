@@ -1,7 +1,6 @@
 ﻿using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 using System;
-using System.Collections.Generic;
 
 namespace ContosoUniversity.Tests
 {
@@ -9,7 +8,6 @@ namespace ContosoUniversity.Tests
     {
         public static void InitializeDbForTests(SchoolContext context)
         {
-            // Seed a small set of students/enrollments needed by StudentPagesTests
             context.Students.Add(new Student { ID = 1, FirstMidName = "Carson", LastName = "Alexander", EnrollmentDate = DateTime.Parse("2019-09-01") });
             context.Students.Add(new Student { ID = 2, FirstMidName = "Meredith", LastName = "Alonso", EnrollmentDate = DateTime.Parse("2017-09-01") });
 

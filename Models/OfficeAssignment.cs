@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ContosoUniversity.Models
 {
@@ -12,6 +11,7 @@ namespace ContosoUniversity.Models
         [Display(Name = "Office Location")]
         public string? Location { get; set; }
 
-        public Instructor? Instructor { get; set; }
+        // Navigation property
+        public Instructor Instructor { get; set; } = null!;
     }
 }
