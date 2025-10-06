@@ -1,32 +1,38 @@
 using ContosoUniversity.Data;
-using ContosoUniversity.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services
 builder.Services.AddRazorPages();
-builder.Services.AddControllers();
 
-if (builder.Environment.EnvironmentName == "Testing")
-{
-    builder.Services.AddDbContext<SchoolContext>(options =>
-        options.UseInMemoryDatabase("TestDb"));
-}
-else
+// Register SQL Server only when NOT testing
+if (!builder.Environment.EnvironmentName.Equals("Testing", StringComparison.OrdinalIgnoreCase))
 {
     builder.Services.AddDbContext<SchoolContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 }
 
-builder.Services.AddScoped<ICourseService, DbExportService>();
-
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+// Seed database only if NOT testing
+if (!app.Environment.EnvironmentName.Equals("Testing", StringComparison.OrdinalIgnoreCase))
 {
-    app.UseDeveloperExceptionPage();
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<SchoolContext>();
+    try
+    {
+        context.Database.Migrate();
+        // Optional seeding code here
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred creating or seeding the database.");
+    }
 }
-else
+
+if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
     app.UseHsts();
@@ -35,27 +41,8 @@ else
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseAuthorization();
-
 app.MapRazorPages();
-app.MapControllers();
-
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<SchoolContext>();
-    try
-    {
-        context.Database.Migrate();
-        DbInitializer.Initialize(context);
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred creating or seeding the database.");
-    }
-}
-
 app.Run();
 
+// Make Program class accessible to integration tests
 public partial class Program { }

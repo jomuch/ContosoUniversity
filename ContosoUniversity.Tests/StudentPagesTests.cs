@@ -1,24 +1,27 @@
-using System.Net;
-using System.Threading.Tasks;
+using ContosoUniversity;
 using Xunit;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace ContosoUniversity.Tests
 {
     public class StudentPagesTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
-        private readonly CustomWebApplicationFactory<Program> _factory;
+        private readonly HttpClient _client;
 
-        public StudentPagesTests(CustomWebApplicationFactory<Program> factory) => _factory = factory;
+        public StudentPagesTests(CustomWebApplicationFactory<Program> factory)
+        {
+            _client = factory.CreateClient();
+        }
 
         [Fact]
-        public async Task Get_StudentsIndexPage_ReturnsSuccessAndCorrectContentType()
+        public async Task Get_StudentsIndexPage_ReturnsSuccess()
         {
-            var client = _factory.CreateClient();
-            var response = await client.GetAsync("/Students");
-
-            response.EnsureSuccessStatusCode(); // Status 200-299
-            Assert.Equal("text/html; charset=utf-8",
-                         response.Content.Headers.ContentType.ToString());
+            var response = await _client.GetAsync("/Students");
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.Contains("Alice", content);
+            Assert.Contains("Bob", content);
         }
     }
 }

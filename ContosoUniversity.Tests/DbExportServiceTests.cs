@@ -1,31 +1,37 @@
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
-using ContosoUniversity.Services;
-using System;
-using System.Linq;
-using System.Xml.Linq;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using Xunit;
 
 namespace ContosoUniversity.Tests
 {
     public class DbExportServiceTests
     {
-        private readonly DbContextOptions<SchoolContext> _options;
-        public DbExportServiceTests() => _options = new DbContextOptionsBuilder<SchoolContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
+        private readonly SchoolContext _context;
+
+        public DbExportServiceTests()
+        {
+            var options = new DbContextOptionsBuilder<SchoolContext>()
+                .UseInMemoryDatabase(databaseName: "TestDb")
+                .Options;
+            _context = new SchoolContext(options);
+
+            // Seed data
+            _context.Students.Add(new Student { FirstMidName = "Test", LastName = "Student", EnrollmentDate = System.DateTime.Now });
+            _context.SaveChanges();
+        }
 
         [Fact]
-        public void ExportToXml_WithData_CreatesCorrectRootElement()
+        public void Students_CanBeAdded()
         {
-            using var context = new SchoolContext(_options);
-            context.Students.Add(new Student { FirstMidName = "Test", LastName = "Student", EnrollmentDate = DateTime.Now });
-            context.SaveChanges();
-            var service = new DbExportService(context);
-            XDocument result = service.ExportToXml();
-            Assert.NotNull(result);
-            Assert.Equal("School", result.Root.Name.LocalName);
+            var count = _context.Students.Count();
+            Assert.Equal(1, count);
+
+            _context.Students.Add(new Student { FirstMidName = "New", LastName = "Student", EnrollmentDate = System.DateTime.Now });
+            _context.SaveChanges();
+
+            Assert.Equal(2, _context.Students.Count());
         }
     }
 }

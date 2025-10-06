@@ -1,45 +1,26 @@
-﻿using ContosoUniversity.Models;
-using Microsoft.Extensions.DependencyInjection;
-using System.Net;
-using System.Threading.Tasks;
+﻿using ContosoUniversity;
 using Xunit;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace ContosoUniversity.Tests
 {
     public class StudentDetailsPageTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
-        private readonly CustomWebApplicationFactory<Program> _factory;
+        private readonly HttpClient _client;
 
         public StudentDetailsPageTests(CustomWebApplicationFactory<Program> factory)
         {
-            _factory = factory;
+            _client = factory.CreateClient();
         }
 
         [Fact]
         public async Task Get_StudentDetailsPage_ReturnsSuccess()
         {
-            using var scope = _factory.Services.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<ContosoUniversity.Data.SchoolContext>();
-
-            // Seed a student
-            var student = new Student
-            {
-                FirstMidName = "Test",
-                LastName = "Student",
-                EnrollmentDate = System.DateTime.Now
-            };
-            context.Students.Add(student);
-            context.SaveChanges();
-
-            var client = _factory.CreateClient();
-
-            var response = await client.GetAsync($"/Students/Details?id={student.ID}");
-
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
+            var response = await _client.GetAsync("/Students/Details/1");
+            response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
-            Assert.Contains("Test", content);
-            Assert.Contains("Student", content);
+            Assert.Contains("Alice", content);
         }
     }
 }
