@@ -19,7 +19,7 @@ namespace ContosoUniversity.Pages.Students
             _logger = logger;
         }
 
-        public Student? Student { get; set; }
+        public Student Student { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -27,8 +27,6 @@ namespace ContosoUniversity.Pages.Students
             {
                 return NotFound();
             }
-
-            _logger.LogInformation("Getting details for Student ID: {StudentId}", id);
 
             Student = await _context.Students
                 .Include(s => s.Enrollments)
@@ -38,10 +36,12 @@ namespace ContosoUniversity.Pages.Students
 
             if (Student == null)
             {
-                _logger.LogWarning("Student with ID: {StudentId} not found.", id);
                 return NotFound();
             }
-
+            else
+            {
+                _logger.LogInformation("User viewed details for Student ID {StudentId} at {ViewTime}", Student.ID, System.DateTime.UtcNow);
+            }
             return Page();
         }
     }

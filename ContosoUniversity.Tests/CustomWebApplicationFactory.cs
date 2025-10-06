@@ -1,4 +1,5 @@
 ﻿using ContosoUniversity.Data;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,31 +10,32 @@ namespace ContosoUniversity.Tests
     public class CustomWebApplicationFactory<TProgram>
         : WebApplicationFactory<TProgram> where TProgram : class
     {
-        protected override void ConfigureWebHost(Microsoft.AspNetCore.Hosting.IWebHostBuilder builder)
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.ConfigureServices(services =>
             {
-                // Remove any existing DbContext registration (SQL Server)
-                var descriptor = services.SingleOrDefault(
-                    d => d.ServiceType == typeof(DbContextOptions<SchoolContext>));
-                if (descriptor != null)
-                    services.Remove(descriptor);
+                var dbContextDescriptor = services.SingleOrDefault(
+                    d => d.ServiceType ==
+                        typeof(DbContextOptions<SchoolContext>));
 
-                // Register InMemory DB for testing
+                if (dbContextDescriptor != null)
+                {
+                    services.Remove(dbContextDescriptor);
+                }
+
                 services.AddDbContext<SchoolContext>(options =>
                 {
                     options.UseInMemoryDatabase("InMemoryDbForTesting");
                 });
 
-                // Build provider and seed test data
                 var sp = services.BuildServiceProvider();
+
                 using (var scope = sp.CreateScope())
                 {
-                    var context = scope.ServiceProvider.GetRequiredService<SchoolContext>();
-                    context.Database.EnsureDeleted();   // fresh start
-                    context.Database.EnsureCreated();
-
-                    DbInitializer.SeedInMemory(context); // seed test students
+                    var scopedServices = scope.ServiceProvider;
+                    var db = scopedServices.GetRequiredService<SchoolContext>();
+                    db.Database.EnsureCreated();
+                    Utilities.InitializeDbForTests(db);
                 }
             });
         }

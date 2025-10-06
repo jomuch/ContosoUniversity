@@ -27,10 +27,8 @@
     <Folder Include="csproj-backups\" />
   </ItemGroup>
 
-  <!-- 🔒 Prevent test project files from being compiled by this main web app -->
   <ItemGroup>
-    <Compile Remove="ContosoUniversity.Tests\**\*.cs" />
-    <None Include="ContosoUniversity.Tests\**\*" Exclude="**\bin\**;**\obj\**" />
+    <InternalsVisibleTo Include="ContosoUniversity.Tests" />
   </ItemGroup>
 
 </Project>

@@ -1,39 +1,41 @@
 ﻿using ContosoUniversity.Models;
-using ContosoUniversity.Data;
+using System;
+using System.Linq;
 
 namespace ContosoUniversity.Data
 {
     public static class DbInitializer
     {
-        // Seed SQL Server DB
         public static void Initialize(SchoolContext context)
         {
-            if (context.Students.Any()) return;
+            if (context.Students.Any())
+                return; // Already seeded
 
+            SeedData(context);
+        }
+
+        public static void SeedInMemory(SchoolContext context)
+        {
+            // Ensure we start fresh each test run
+            context.Database.EnsureDeleted();
+            context.Database.EnsureCreated();
+
+            SeedData(context);
+        }
+
+        private static void SeedData(SchoolContext context)
+        {
             var students = new Student[]
             {
-                new Student { ID = 1, FirstMidName = "Carson", LastName = "Alexander", EnrollmentDate = DateTime.Parse("2019-09-01") },
-                new Student { ID = 2, FirstMidName = "Meredith", LastName = "Alonso", EnrollmentDate = DateTime.Parse("2017-09-01") },
-                new Student { ID = 3, FirstMidName = "Arturo", LastName = "Anand", EnrollmentDate = DateTime.Parse("2018-09-01") },
-                new Student { ID = 4, FirstMidName = "Gytis", LastName = "Barzdukas", EnrollmentDate = DateTime.Parse("2017-09-01") }
+                new Student { FirstMidName = "Carson",   LastName = "Alexander", EnrollmentDate = DateTime.Parse("2016-09-01") },
+                new Student { FirstMidName = "Meredith", LastName = "Alonso",    EnrollmentDate = DateTime.Parse("2018-09-01") },
+                new Student { FirstMidName = "Arturo",   LastName = "Anand",     EnrollmentDate = DateTime.Parse("2019-09-01") },
             };
 
             context.Students.AddRange(students);
             context.SaveChanges();
-        }
 
-        // Seed InMemory DB for tests
-        public static void SeedInMemory(SchoolContext context)
-        {
-            context.Students.AddRange(new Student[]
-            {
-                new Student { ID = 1, FirstMidName = "Carson", LastName = "Alexander", EnrollmentDate = DateTime.Parse("2019-09-01") },
-                new Student { ID = 2, FirstMidName = "Meredith", LastName = "Alonso", EnrollmentDate = DateTime.Parse("2017-09-01") },
-                new Student { ID = 3, FirstMidName = "Arturo", LastName = "Anand", EnrollmentDate = DateTime.Parse("2018-09-01") },
-                new Student { ID = 4, FirstMidName = "Gytis", LastName = "Barzdukas", EnrollmentDate = DateTime.Parse("2017-09-01") }
-            });
-
-            context.SaveChanges();
+            // Add additional seed data (courses, enrollments, etc.) as needed.
         }
     }
 }
