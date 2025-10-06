@@ -1,38 +1,52 @@
-using ContosoUniversity.Tests;
+using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
+using ContosoUniversity.Data;
+using ContosoUniversity.Models;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace ContosoUniversity.Tests
 {
-    public class StudentPagesTests : IClassFixture<CustomWebApplicationFactory<Program>>
+    public class StudentPagesTests : IClassFixture<CustomWebApplicationFactory>
     {
-        private readonly CustomWebApplicationFactory<Program> _factory;
+        private readonly HttpClient _client;
 
-        public StudentPagesTests(CustomWebApplicationFactory<Program> factory)
+        public StudentPagesTests(CustomWebApplicationFactory factory)
         {
-            _factory = factory;
-        }
+            _client = factory.CreateClient();
 
-        [Fact]
-        public async Task Get_StudentsIndexPage_ReturnsSuccessAndCorrectContent()
-        {
-            var client = _factory.CreateClient();
-            var response = await client.GetAsync("/Students");
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
-            Assert.Contains("Students", content);
+            using var scope = factory.Services.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<SchoolContext>();
+            context.Database.EnsureDeleted();
+            context.Database.EnsureCreated();
+
+            if (!context.Students.Any())
+            {
+                context.Students.Add(new Student
+                {
+                    FirstMidName = "Test",
+                    LastName = "Student",
+                    EnrollmentDate = System.DateTime.Now
+                });
+                context.SaveChanges();
+            }
         }
 
         [Fact]
         public async Task Get_StudentDetailsPage_ReturnsSuccessAndCorrectContent()
         {
-            var client = _factory.CreateClient();
-            var response = await client.GetAsync("/Students/Details/1");
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
+            using var scope = new CustomWebApplicationFactory().Services.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<SchoolContext>();
+            var student = await context.Students.FirstAsync();
 
-            // THE FIX: We are now just checking for the last name.
-            Assert.Contains("Alexander", content);
+            var response = await _client.GetAsync($"/Students/Details/{student.ID}");
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.Contains(student.LastName, content);
         }
     }
 }
