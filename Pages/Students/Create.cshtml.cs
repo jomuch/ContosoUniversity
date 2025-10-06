@@ -1,9 +1,9 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using ContosoUniversity.Data;
+﻿using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 using ContosoUniversity.Models.ViewModels;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Threading.Tasks;
 
 namespace ContosoUniversity.Pages.Students
 {
@@ -28,7 +28,7 @@ namespace ContosoUniversity.Pages.Students
         {
             if (!ModelState.IsValid)
             {
-                return Page(); // redisplay with errors
+                return Page();
             }
 
             var student = new Student
@@ -40,9 +40,8 @@ namespace ContosoUniversity.Pages.Students
 
             _context.Students.Add(student);
             await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] = "Student created successfully!";
-            return RedirectToPage("./Index"); // PRG pattern
+            
+            return RedirectToPage("./Index");
         }
     }
 }
