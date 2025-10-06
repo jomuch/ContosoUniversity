@@ -4,21 +4,26 @@ using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Information);
+
+// Add services
 builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
 
+// Only add SQL Server if not running tests
 if (!builder.Environment.EnvironmentName.Equals("Testing", StringComparison.OrdinalIgnoreCase))
 {
     builder.Services.AddDbContext<SchoolContext>(options =>
-        options.UseSqlServer(
-            builder.Configuration.GetConnectionString("SchoolContext")
-            ?? throw new InvalidOperationException("Connection string 'SchoolContext' not found.")
-        )
-    );
+        options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolContext")
+            ?? throw new InvalidOperationException("Connection string 'SchoolContext' not found.")));
 }
 
 var app = builder.Build();
 
+// Initialize database if not in Testing environment
 if (!builder.Environment.EnvironmentName.Equals("Testing", StringComparison.OrdinalIgnoreCase))
 {
     using var scope = app.Services.CreateScope();
@@ -36,6 +41,7 @@ if (!builder.Environment.EnvironmentName.Equals("Testing", StringComparison.Ordi
     }
 }
 
+// Configure middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
