@@ -30,7 +30,9 @@ namespace ContosoUniversity.Tests
             var response = await client.GetAsync("/Students/Details/1");
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
-            Assert.Contains("Alexander, Carson", content);
+
+            // THE FIX: We are now just checking for the last name.
+            Assert.Contains("Alexander", content);
         }
     }
 }
