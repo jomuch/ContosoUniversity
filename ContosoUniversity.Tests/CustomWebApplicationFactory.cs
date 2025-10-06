@@ -1,6 +1,4 @@
 ﻿using ContosoUniversity.Data;
-using ContosoUniversity.Models;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,62 +6,36 @@ using System.Linq;
 
 namespace ContosoUniversity.Tests
 {
-    public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProgram>
-        where TProgram : class
+    public class CustomWebApplicationFactory<TProgram>
+        : WebApplicationFactory<TProgram> where TProgram : class
     {
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        protected override void ConfigureWebHost(Microsoft.AspNetCore.Hosting.IWebHostBuilder builder)
         {
-            builder.UseEnvironment("Testing");
-
             builder.ConfigureServices(services =>
             {
-                // Remove SQL Server DbContext registration
+                // Remove any existing DbContext registration (SQL Server)
                 var descriptor = services.SingleOrDefault(
                     d => d.ServiceType == typeof(DbContextOptions<SchoolContext>));
                 if (descriptor != null)
                     services.Remove(descriptor);
 
-                // Add InMemory DbContext
+                // Register InMemory DB for testing
                 services.AddDbContext<SchoolContext>(options =>
-                    options.UseInMemoryDatabase("InMemoryDbForTesting"));
+                {
+                    options.UseInMemoryDatabase("InMemoryDbForTesting");
+                });
 
+                // Build provider and seed test data
                 var sp = services.BuildServiceProvider();
+                using (var scope = sp.CreateScope())
+                {
+                    var context = scope.ServiceProvider.GetRequiredService<SchoolContext>();
+                    context.Database.EnsureDeleted();   // fresh start
+                    context.Database.EnsureCreated();
 
-                using var scope = sp.CreateScope();
-                var db = scope.ServiceProvider.GetRequiredService<SchoolContext>();
-
-                // Clear the database before seeding
-                db.Students.RemoveRange(db.Students);
-                db.Departments.RemoveRange(db.Departments);
-                db.Courses.RemoveRange(db.Courses);
-                db.Enrollments.RemoveRange(db.Enrollments);
-                db.SaveChanges();
-
-                SeedTestData(db);
+                    DbInitializer.SeedInMemory(context); // seed test students
+                }
             });
-        }
-
-        private void SeedTestData(SchoolContext context)
-        {
-            // Add students
-            context.Students.AddRange(
-                new Student { FirstMidName = "Alice", LastName = "Smith" },
-                new Student { FirstMidName = "Bob", LastName = "Johnson" }
-            );
-
-            // Add departments
-            context.Departments.AddRange(
-                new Models.Department { DepartmentID = 1, Name = "Science" },
-                new Models.Department { DepartmentID = 2, Name = "Math" }
-            );
-
-            // Add courses
-            context.Courses.AddRange(
-                new Course { CourseID = 1, Title = "Chemistry", Credits = 3, DepartmentID = 1 },
-                new Course { CourseID = 2, Title = "Algebra", Credits = 4, DepartmentID = 2 }
-            );
-
-            context.SaveChanges();
         }
     }
 }

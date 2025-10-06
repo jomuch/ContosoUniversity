@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -9,7 +9,7 @@ namespace ContosoUniversity.Models
     {
         public int DepartmentID { get; set; }
 
-        [Required, StringLength(50, MinimumLength = 3)]
+        [StringLength(50, MinimumLength = 3)]
         public string Name { get; set; } = string.Empty;
 
         [DataType(DataType.Currency)]
@@ -17,13 +17,16 @@ namespace ContosoUniversity.Models
         public decimal Budget { get; set; }
 
         [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime StartDate { get; set; }
 
+        // This is the Foreign Key to the Instructor table
         public int? InstructorID { get; set; }
 
+        // This is the Navigation Property for the Administrator (Instructor)
         public Instructor? Administrator { get; set; }
 
-        public ICollection<Course> Courses { get; set; } = new List<Course>();
+        public ICollection<Course>? Courses { get; set; }
 
         [Timestamp]
         public byte[]? RowVersion { get; set; }

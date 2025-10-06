@@ -1,30 +1,23 @@
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ContosoUniversity.Models
 {
     public class Student
     {
         public int ID { get; set; }
-
-        [Required]
-        [StringLength(50)]
         public string LastName { get; set; } = null!;
-
-        [Required]
-        [Display(Name = "First Name")]
-        [StringLength(50)]
         public string FirstMidName { get; set; } = null!;
-
-        [DataType(DataType.Date)]
-        [Display(Name = "Enrollment Date")]
         public DateTime EnrollmentDate { get; set; }
+        public string FullName
+        {
+            get
+            {
+                return LastName + ", " + FirstMidName;
+            }
+        }
 
-        // Navigation property
         public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
-
-        // Optional helper property
-        public string FullName => $"{FirstMidName} {LastName}";
     }
 }

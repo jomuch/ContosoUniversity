@@ -1,37 +1,57 @@
 using ContosoUniversity.Data;
+using ContosoUniversity.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services
+// Add services to the container
 builder.Services.AddRazorPages();
 
-// Register SQL Server only when NOT testing
+// Register DbExportService for DI
+builder.Services.AddScoped<IDataExportService, DbExportService>();
+
+// Use SQL Server unless we're in a testing environment
 if (!builder.Environment.EnvironmentName.Equals("Testing", StringComparison.OrdinalIgnoreCase))
 {
     builder.Services.AddDbContext<SchoolContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 }
+else
+{
+    // In-memory DB for integration tests
+    builder.Services.AddDbContext<SchoolContext>(options =>
+        options.UseInMemoryDatabase("InMemoryDbForTesting"));
+}
 
 var app = builder.Build();
 
-// Seed database only if NOT testing
-if (!app.Environment.EnvironmentName.Equals("Testing", StringComparison.OrdinalIgnoreCase))
+// Seed the database
+using (var scope = app.Services.CreateScope())
 {
-    using var scope = app.Services.CreateScope();
-    var context = scope.ServiceProvider.GetRequiredService<SchoolContext>();
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<SchoolContext>();
+
     try
     {
-        context.Database.Migrate();
-        // Optional seeding code here
+        if (!app.Environment.IsEnvironment("Testing"))
+        {
+            context.Database.Migrate();          // SQL Server migrations
+            DbInitializer.Initialize(context);   // Seed SQL Server DB
+        }
+        else
+        {
+            DbInitializer.SeedInMemory(context); // Seed InMemory DB
+        }
     }
     catch (Exception ex)
     {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "An error occurred creating or seeding the database.");
     }
 }
 
+// Configure HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -42,7 +62,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.MapRazorPages();
+
 app.Run();
 
-// Make Program class accessible to integration tests
+// Make Program class public and partial for integration tests
 public partial class Program { }
