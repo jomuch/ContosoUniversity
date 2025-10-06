@@ -8,6 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Information);
+builder.Logging.AddDebug();
+
+
 
 // Add services
 builder.Services.AddRazorPages();
