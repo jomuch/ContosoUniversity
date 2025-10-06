@@ -28,6 +28,7 @@ namespace ContosoUniversity.Pages.Students
                 return NotFound();
 
             Student = await _context.Students
+                .Include(s => s.Enrollments) // load related enrollments
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.ID == id);
 
@@ -47,20 +48,30 @@ namespace ContosoUniversity.Pages.Students
             if (id == null)
                 return NotFound();
 
-            var student = await _context.Students.FindAsync(id);
+            var student = await _context.Students
+                .Include(s => s.Enrollments) // include related data
+                .FirstOrDefaultAsync(s => s.ID == id);
 
             if (student == null)
                 return NotFound();
 
             try
             {
+                if (student.Enrollments.Count > 0)
+                {
+                    // prevent deletion if there are enrollments
+                    ErrorMessage = "Cannot delete student with enrollments assigned.";
+                    return Page();
+                }
+
                 _context.Students.Remove(student);
                 await _context.SaveChangesAsync();
                 return RedirectToPage("./Index");
             }
             catch (DbUpdateException)
             {
-                return RedirectToAction("./Delete", new { id, saveChangesError = true });
+                // redirect back to Delete page with error
+                return RedirectToPage("./Delete", new { id, saveChangesError = true });
             }
         }
     }
