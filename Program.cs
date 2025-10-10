@@ -10,8 +10,6 @@ builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Information);
 builder.Logging.AddDebug();
 
-
-
 // Add services
 builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
@@ -62,6 +60,10 @@ app.MapControllerRoute(
 );
 app.MapRazorPages();
 
+// 🌟 Week 8: Health endpoint
+app.MapGet("/healthz", () => Results.Ok("OK"));
+
 app.Run();
 
+// Needed for integration tests
 public partial class Program { }
