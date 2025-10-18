@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Students>
+  <Student>
+    <FirstName>Carson</FirstName>
+    <LastName>Alexander</LastName>
+    <EnrollmentDate>2019-09-01</EnrollmentDate>
+  </Student>
+  <Student>
+    <FirstName>Meredith</FirstName>
+    <LastName>Alonso</LastName>
+    <EnrollmentDate>2017-09-01</EnrollmentDate>
+  </Student>
+  <Student>
+    <FirstName>Arturo</FirstName>
+    <LastName>Anand</LastName>
+    <EnrollmentDate>2018-09-01</EnrollmentDate>
+  </Student>
+  <Student>
+    <FirstName>Gytis</FirstName>
+    <LastName>Barzdukas</LastName>
+    <EnrollmentDate>2017-09-01</EnrollmentDate>
+  </Student>
+  <Student>
+    <FirstName>Yan</FirstName>
+    <LastName>Li</LastName>
+    <EnrollmentDate>2017-09-01</EnrollmentDate>
+  </Student>
+  <Student>
+    <FirstName>Peggy</FirstName>
+    <LastName>Justice</LastName>
+    <EnrollmentDate>2016-09-01</EnrollmentDate>
+  </Student>
+  <Student>
+    <FirstName>Laura</FirstName>
+    <LastName>Norman</LastName>
+    <EnrollmentDate>2018-09-01</EnrollmentDate>
+  </Student>
+  <Student>
+    <FirstName>Nino</FirstName>
+    <LastName>Olivetto</LastName>
+    <EnrollmentDate>2019-09-01</EnrollmentDate>
+  </Student>
+</Students>
