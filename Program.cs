@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using ContosoUniversity.Data;
-using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,23 +12,20 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 var app = builder.Build();
 
-// This is the new code to add
+// Create a service scope to get the DbContext and seed the database on startup.
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var logger = services.GetRequiredService<ILogger<Program>>();
     try
     {
         var context = services.GetRequiredService<SchoolContext>();
-        context.Database.Migrate(); // Ensures the database is created and migrated
-
-        logger.LogInformation("--- Seeding database from XML ---");
-
-        ContosoUniversity.Data.DbInitializer.InitializeFromXml(context, "Data/SeedData.xml");
+        // context.Database.EnsureCreated(); // This is handled by DbInitializer.
+        DbInitializer.Initialize(context); // <-- This is the corrected line
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "An error occurred while creating or seeding the DB.");
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the DB.");
     }
 }
 
@@ -58,4 +53,3 @@ app.UseAuthorization();
 app.MapRazorPages();
 
 app.Run();
-

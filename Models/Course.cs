@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ContosoUniversity.Models
 {
     public class Course
     {
-        [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Display(Name = "Number")]
         public int CourseID { get; set; }
@@ -16,10 +16,14 @@ namespace ContosoUniversity.Models
         [Range(0, 5)]
         public int Credits { get; set; }
 
-        [Display(Name = "Department")]
-        public int DepartmentID { get; set; }   // FK
+        public int DepartmentID { get; set; }
 
-        // Navigation property
         public Department? Department { get; set; }
+
+        // This collection creates the one-to-many link to enrollments
+        public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
+
+        // This collection creates the many-to-many link to instructors
+        public ICollection<CourseAssignment> CourseAssignments { get; set; } = new List<CourseAssignment>();
     }
 }

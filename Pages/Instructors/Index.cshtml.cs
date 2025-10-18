@@ -1,11 +1,7 @@
 using ContosoUniversity.Models;
 using ContosoUniversity.Models.SchoolViewModels;
-using ContosoUniversity.Models.ViewModels;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ContosoUniversity.Pages.Instructors
 {
@@ -18,13 +14,14 @@ namespace ContosoUniversity.Pages.Instructors
             _context = context;
         }
 
-        public InstructorIndexData InstructorData { get; set; }
+        // Property is now initialized to prevent nullability warnings.
+        public InstructorIndexData InstructorData { get; set; } = new();
         public int InstructorID { get; set; }
         public int CourseID { get; set; }
 
         public async Task OnGetAsync(int? id, int? courseID)
         {
-            InstructorData = new InstructorIndexData();
+            // This first query is already well-structured.
             InstructorData.Instructors = await _context.Instructors
                 .Include(i => i.OfficeAssignment)
                 .Include(i => i.CourseAssignments)
@@ -36,22 +33,32 @@ namespace ContosoUniversity.Pages.Instructors
             if (id != null)
             {
                 InstructorID = id.Value;
-                Instructor instructor = InstructorData.Instructors
-                    .Where(i => i.ID == id.Value).Single();
-                InstructorData.Courses = instructor.CourseAssignments.Select(s => s.Course);
+                // Using SingleOrDefault is safer than Single() and prevents crashes if no match is found.
+                Instructor? instructor = InstructorData.Instructors
+                    .Where(i => i.ID == id.Value).SingleOrDefault();
+
+                if (instructor != null)
+                {
+                    InstructorData.Courses = instructor.CourseAssignments.Select(s => s.Course);
+                }
             }
 
             if (courseID != null)
             {
                 CourseID = courseID.Value;
-                var selectedCourse = InstructorData.Courses
-                    .Where(x => x.CourseID == courseID).Single();
-                await _context.Entry(selectedCourse).Collection(x => x.Enrollments).LoadAsync();
-                foreach (Enrollment enrollment in selectedCourse.Enrollments)
+
+                // This is the efficient way to load the enrollments and students.
+                // It uses one database query instead of many.
+                var selectedCourse = await _context.Courses
+                    .Include(c => c.Enrollments)
+                        .ThenInclude(e => e.Student)
+                    .AsNoTracking() // Good practice for read-only data
+                    .FirstOrDefaultAsync(c => c.CourseID == courseID.Value);
+
+                if (selectedCourse != null)
                 {
-                    await _context.Entry(enrollment).Reference(x => x.Student).LoadAsync();
+                    InstructorData.Enrollments = selectedCourse.Enrollments;
                 }
-                InstructorData.Enrollments = selectedCourse.Enrollments;
             }
         }
     }

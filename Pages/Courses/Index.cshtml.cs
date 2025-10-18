@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Data;
@@ -19,11 +17,17 @@ namespace ContosoUniversity.Pages.Courses
             _context = context;
         }
 
-        public IList<Course> Course { get; set; } = default!;
+        // Renamed property to 'Courses' (plural) for clarity.
+        public IList<Course> Courses { get; set; } = new List<Course>();
 
         public async Task OnGetAsync()
         {
-            Course = await _context.Courses.ToListAsync();
+            // Added .Include() to eagerly load the related Department data.
+            // Added .AsNoTracking() for better performance on a read-only page.
+            Courses = await _context.Courses
+                .Include(c => c.Department)
+                .AsNoTracking()
+                .ToListAsync();
         }
     }
 }
