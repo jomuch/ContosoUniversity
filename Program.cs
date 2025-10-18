@@ -19,7 +19,7 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<SchoolContext>();
         DbInitializer.Initialize(context);
-        DbExporter.ExportToXml(context, "ExportedData.xml");
+        DbExporter.ExportToXml(context, "Data/ExportedData.xml");
     }
     catch (Exception ex)
     {
