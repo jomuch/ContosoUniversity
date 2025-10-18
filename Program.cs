@@ -19,12 +19,11 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<SchoolContext>();
         DbInitializer.Initialize(context);
-        DbExporter.ExportToXml(context, "Data/ExportedData.xml");
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred during DB creation, seeding, or exporting.");
+        logger.LogError(ex, "An error occurred while seeding the DB.");
     }
 }
 
