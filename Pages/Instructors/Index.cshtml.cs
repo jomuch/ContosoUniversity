@@ -1,12 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using ContosoUniversity.Models;
+using ContosoUniversity.Models.SchoolViewModels;
+using ContosoUniversity.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using ContosoUniversity.Data;
-using ContosoUniversity.Models;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ContosoUniversity.Pages.Instructors
 {
@@ -19,67 +18,40 @@ namespace ContosoUniversity.Pages.Instructors
             _context = context;
         }
 
-        public PaginatedList<Instructor> Instructor { get; set; } = default!;
-        public string NameSort { get; set; } = null!;
-        public string DateSort { get; set; } = null!;
-        public string CurrentFilter { get; set; } = null!;
-        public string CurrentSort { get; set; } = null!;
-        public Instructor InstructorData { get; set; } = new Instructor();
-        public ICollection<Course> AssignedCoursesData { get; set; } = new List<Course>();
+        public InstructorIndexData InstructorData { get; set; }
         public int InstructorID { get; set; }
+        public int CourseID { get; set; }
 
-        public async Task OnGetAsync(string sortOrder, string currentFilter, string searchString, int? pageIndex, int? id)
+        public async Task OnGetAsync(int? id, int? courseID)
         {
-            CurrentSort = sortOrder;
-            NameSort = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-            DateSort = sortOrder == "Date" ? "date_desc" : "Date";
-
-            if (searchString != null)
-            {
-                pageIndex = 1;
-            }
-            else
-            {
-                searchString = currentFilter;
-            }
-            CurrentFilter = searchString;
-
-            IQueryable<Instructor> instructorsIQ = from i in _context.Instructors
+            InstructorData = new InstructorIndexData();
+            InstructorData.Instructors = await _context.Instructors
                 .Include(i => i.OfficeAssignment)
                 .Include(i => i.CourseAssignments)
-                .ThenInclude(i => i.Course)
-                                                   select i;
-
-            if (!String.IsNullOrEmpty(searchString))
-            {
-                instructorsIQ = instructorsIQ.Where(i => i.LastName.Contains(searchString) || i.FirstMidName.Contains(searchString));
-            }
-
-            switch (sortOrder)
-            {
-                case "name_desc":
-                    instructorsIQ = instructorsIQ.OrderByDescending(i => i.LastName);
-                    break;
-                case "Date":
-                    instructorsIQ = instructorsIQ.OrderBy(i => i.HireDate);
-                    break;
-                case "date_desc":
-                    instructorsIQ = instructorsIQ.OrderByDescending(i => i.HireDate);
-                    break;
-                default:
-                    instructorsIQ = instructorsIQ.OrderBy(i => i.LastName);
-                    break;
-            }
-
-            int pageSize = 3;
-            Instructor = await PaginatedList<Instructor>.CreateAsync(instructorsIQ.AsNoTracking(), pageIndex ?? 1, pageSize);
+                    .ThenInclude(c => c.Course)
+                        .ThenInclude(c => c.Department)
+                .OrderBy(i => i.LastName)
+                .ToListAsync();
 
             if (id != null)
             {
                 InstructorID = id.Value;
-                InstructorData = Instructor.Single(i => i.ID == id.Value);
-                var courses = InstructorData.CourseAssignments.Select(s => s.Course);
-                AssignedCoursesData = courses.ToList();
+                Instructor instructor = InstructorData.Instructors
+                    .Where(i => i.ID == id.Value).Single();
+                InstructorData.Courses = instructor.CourseAssignments.Select(s => s.Course);
+            }
+
+            if (courseID != null)
+            {
+                CourseID = courseID.Value;
+                var selectedCourse = InstructorData.Courses
+                    .Where(x => x.CourseID == courseID).Single();
+                await _context.Entry(selectedCourse).Collection(x => x.Enrollments).LoadAsync();
+                foreach (Enrollment enrollment in selectedCourse.Enrollments)
+                {
+                    await _context.Entry(enrollment).Reference(x => x.Student).LoadAsync();
+                }
+                InstructorData.Enrollments = selectedCourse.Enrollments;
             }
         }
     }
